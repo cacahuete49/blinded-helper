@@ -6,8 +6,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.RotatedRect;
 
-import angers.m2.boundingbox.Tools.Vista;
 import angers.m2.boundingbox.form.constraint.IConstraint;
+import angers.m2.boundingbox.tools.Vista;
 
 /**
  * Created by cacahuete on 22/05/16.
@@ -56,19 +56,12 @@ public class DoorForm extends AbstractForm implements IForm {
         });
 
         /**
-         *  Contrainte de positionnement du centre a l'horizon
+         *  Contrainte de positionnement horizontal et a l'horizon
          */
         constraints.add(new IConstraint() {
             @Override
             public boolean assertConstraint(RotatedRect rect, Mat src) {
-                try {
-                    boolean value = Vista.getPositionPoint(src, rect.center) == Vista.INSIDE;
-                    Log.d("constraint","value="+value);
-                    return value;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return false;
+                return Vista.getPositionPoint(src, rect.center) == Vista.INSIDE && (Math.abs(rect.angle) < 15);
             }
         });
 
