@@ -1,0 +1,50 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="angers.m2.contour.MainActivity">
+    <item
+        android:id="@+id/img1"
+        android:orderInCategory="100"
+        android:title="img1"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/img2"
+        android:orderInCategory="100"
+        android:title="img2"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/img3"
+        android:orderInCategory="100"
+        android:title="img3"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/img4"
+        android:orderInCategory="100"
+        android:title="img4"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/img5"
+        android:orderInCategory="100"
+        android:title="img5"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/img6"
+        android:orderInCategory="100"
+        android:title="img6"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/img7"
+        android:orderInCategory="100"
+        android:title="img7"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/img8"
+        android:orderInCategory="100"
+        android:title="img8"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/img9"
+        android:orderInCategory="100"
+        android:title="img9"
+        app:showAsAction="never" />
+</menu>
