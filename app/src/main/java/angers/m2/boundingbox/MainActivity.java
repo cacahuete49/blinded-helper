@@ -48,8 +48,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import angers.m2.boundingbox.Tools.Speaker;
-import angers.m2.boundingbox.Tools.Vista;
+import angers.m2.boundingbox.tools.Speaker;
+import angers.m2.boundingbox.tools.Vista;
 import angers.m2.boundingbox.form.DoorForm;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, SensorEventListener {
@@ -249,7 +249,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (l1 * l2 < src.height() * src.width() * 0.4 && l2 < src.width() * 0.95 && l1 < src.height() * 0.95) {
 
                 Scalar color = null;
-                double div = l1 / l2;
                 if (doorsingleton.isRecognized(rotRect, mRgba)) {
                     ttobj.speak("la porte est située en " + Speaker.locate(rotRect.center, mRgba), TextToSpeech.QUEUE_ADD, null, "findDoor");
                     color = new Scalar(0, 0, 255);
