@@ -122,9 +122,6 @@ public class Vista {
                 gravityValues = sensorEvent.values;
             }
 
-            Log.d("GRAVITY", gravityValues[0] + " - " + gravityValues[1] + " - " + gravityValues[2]);
-            Log.d("GYROS", Math.toDegrees(gyroscopeValues[0]) + " - " + Math.toDegrees(gyroscopeValues[1]) + " - " + Math.toDegrees(gyroscopeValues[2]));
-
             SensorManager.getRotationMatrix(resultMatrix, null, accelerometreValues, magnetometreValues);
             SensorManager.getOrientation(resultMatrix, gyroscopeValues);
 
@@ -167,8 +164,6 @@ public class Vista {
             // Calcul de la valeur de l'horizon
             double valeur = (currentAngle - angleCalibrage) * PixelByDegree + (mat.width() / 2);
             Point point = new Point(valeur, 0);
-
-            Log.d("GYROS2", valeur + "");
 
             // Création du rectangle correspondant à la ligne d'horizon plus la marge d'erreur
             vista = new Rect((int) point.x - (int) margePixel / 2, (int) point.y, (int) margePixel, mat.width());
@@ -264,19 +259,17 @@ public class Vista {
     }
 
     /**
-     * Retourne la moyenne d'une liste.
-     *
-     * @return La moyenne de la liste.
+     * Calcul la moyenne du gyroscope.
+     * @return La moyenne du gyroscope.
      */
     private float getAverageGyroscope() {
-        float currentAngle = 0;
-        for (float f : pileGyroscope) {
-            currentAngle += f;
-        }
-
-        currentAngle /= pileGyroscope.size();
+        ArrayList<Float> pileGyroscopeCopy = new ArrayList<>(pileGyroscope);
         pileGyroscope.clear();
 
-        return currentAngle;
+        float currentAngle = 0;
+        for (float f : pileGyroscopeCopy) {
+            currentAngle +=f;
+        }
+        return currentAngle /pileGyroscopeCopy.size();
     }
 }

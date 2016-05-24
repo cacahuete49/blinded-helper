@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: /home/cacahuete/Downloads/OpenCV-3.1.0-android-sdk/boundingbox/boundingbox/openCVLibrary310/src/main/aidl/org/opencv/engine/OpenCVEngineInterface.aidl
+ * Original file: /home/mattieu/Projets/blinded-helper/openCVLibrary310/src/main/aidl/org/opencv/engine/OpenCVEngineInterface.aidl
  */
 package org.opencv.engine;
 /**
