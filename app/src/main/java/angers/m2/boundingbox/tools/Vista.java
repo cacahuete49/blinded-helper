@@ -264,19 +264,17 @@ public class Vista {
     }
 
     /**
-     * Retourne la moyenne d'une liste.
-     *
-     * @return La moyenne de la liste.
+     * Calcul la moyenne du gyroscope.
+     * @return La moyenne du gyroscope.
      */
     private float getAverageGyroscope() {
-        float currentAngle = 0;
-        for (float f : pileGyroscope) {
-            currentAngle += f;
-        }
-
-        currentAngle /= pileGyroscope.size();
+        ArrayList<Float> pileGyroscopeCopy = new ArrayList<>(pileGyroscope);
         pileGyroscope.clear();
 
-        return currentAngle;
+        float currentAngle = 0;
+        for (float f : pileGyroscopeCopy) {
+            currentAngle +=f;
+        }
+        return currentAngle /pileGyroscopeCopy.size();
     }
 }
