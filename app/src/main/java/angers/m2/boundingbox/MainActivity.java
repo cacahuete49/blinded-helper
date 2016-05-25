@@ -54,29 +54,30 @@ import angers.m2.boundingbox.form.DoorForm;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, SensorEventListener {
 
-    // TODO a jeter après les test
-    class OneShotTask implements Runnable {
-        Bitmap bmp;
-
-        OneShotTask(Bitmap b) {
-            this.bmp = b;
-        }
-
-        public void run() {
-            if (bmp != null)
-                image.setImageBitmap(bmp);
-        }
-    }
-
     CameraBridgeViewBase cam0;
-
     private Mat mRgba;
-
     private Vista vista = new Vista();
-
     private DoorForm doorsingleton;
-
     private ImageView image;
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS: {
+                    Log.i("opencv", "OpenCV loaded successfully");
+                    cam0.enableView();
+                    cam0.enableFpsMeter();
+                }
+                break;
+                default: {
+                    super.onManagerConnected(status);
+                }
+                break;
+            }
+        }
+    };
+    private TextToSpeech ttobj;
+    private long timer = 0;
 
     private void initSingleton() {
         doorsingleton = DoorForm.getInstance();
@@ -152,35 +153,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     }
 
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
-        @Override
-        public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS: {
-                    Log.i("opencv", "OpenCV loaded successfully");
-                    cam0.enableView();
-                    cam0.enableFpsMeter();
-                }
-                break;
-                default: {
-                    super.onManagerConnected(status);
-                }
-                break;
-            }
-        }
-    };
-
-    private TextToSpeech ttobj;
-
-    private long timer = 0;
-
     public void load_AND_display(Mat src) {
 
 
         findObstacle(src);
         Mat tmp = new Mat();
 
-        Imgproc.cvtColor(src,tmp,Imgproc.COLOR_RGB2GRAY);
+        Imgproc.cvtColor(src, tmp, Imgproc.COLOR_RGB2GRAY);
         Imgproc.threshold(tmp, tmp, 192, 255, Imgproc.THRESH_BINARY);
 //        Imgproc.adaptiveThreshold(tmp,mRgba,255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY_INV, 19, 2);
 
@@ -271,8 +250,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return tmp;
     }
 
+    public void deleteInsideForm(List<MatOfPoint> listMatOfPoint) {
+
+    }
+
     /**
      * Calcul le Kmeans de la zone sous l'horizon pour mettre en avant les obstacles.
+     *
      * @param src entre de la camera
      */
     @NonNull
@@ -437,5 +421,19 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    // TODO a jeter après les test
+    class OneShotTask implements Runnable {
+        Bitmap bmp;
+
+        OneShotTask(Bitmap b) {
+            this.bmp = b;
+        }
+
+        public void run() {
+            if (bmp != null)
+                image.setImageBitmap(bmp);
+        }
     }
 }
