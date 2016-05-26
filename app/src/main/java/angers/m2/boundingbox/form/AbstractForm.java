@@ -1,5 +1,7 @@
 package angers.m2.boundingbox.form;
 
+import android.util.Log;
+
 import org.opencv.core.Mat;
 import org.opencv.core.RotatedRect;
 
@@ -14,7 +16,7 @@ import angers.m2.boundingbox.form.constraint.IConstraint;
 public class AbstractForm implements IForm {
 
     protected Set<IConstraint> constraints = new LinkedHashSet<>();
-    protected float seuil;
+    protected float seuil = 1.0f;
 
     @Override
     public boolean isRecognized(RotatedRect rect, Mat src) {
@@ -23,6 +25,7 @@ public class AbstractForm implements IForm {
         for (IConstraint constraint : this.constraints)
             if (constraint.assertConstraint(rect, src))
                 resultat++;
+        Log.d("abstractForm","valid="+(resultat / (float) constraints.size())+"%");
         return (resultat / (float) constraints.size()) >= seuil;
     }
 }

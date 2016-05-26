@@ -4,9 +4,11 @@ import android.util.Log;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 
 import angers.m2.boundingbox.form.constraint.IConstraint;
+import angers.m2.boundingbox.tools.Kmeans;
 import angers.m2.boundingbox.tools.Vista;
 
 /**
@@ -62,6 +64,22 @@ public class DoorForm extends AbstractForm implements IForm {
             @Override
             public boolean assertConstraint(RotatedRect rect, Mat src) {
                 return Vista.getPositionPoint(src, rect.center) == Vista.INSIDE && (Math.abs(rect.angle) < 15);
+            }
+        });
+
+        /**
+         * Contrainte de couleurs unis à 80% min
+         */
+        constraints.add(new IConstraint() {
+            @Override
+            public boolean assertConstraint(RotatedRect rect, Mat src) {
+                Rect rectTmp = rect.boundingRect();
+                if (rectTmp.tl().x>0 && rectTmp.tl().y>0 && rectTmp.br().x<src.width() && rectTmp.br().y<src.height())
+                    return Kmeans.getPercentMaxColor(src.submat(rectTmp))>80;
+                else {
+                    Log.e("constraint", "Hold the door");
+                }
+                return false;
             }
         });
 
