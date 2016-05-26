@@ -126,11 +126,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         image = (ImageView) findViewById(R.id.imageView);
 
-        try {
-            vista.initialize(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        vista.initialize(this);
+
 
         initSingleton();
 
