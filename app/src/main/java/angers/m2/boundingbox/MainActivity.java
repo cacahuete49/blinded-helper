@@ -419,11 +419,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     @Override
     public void onStart() {
         super.onStart();
-        try {
-            vista.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        vista.start();
     }
 
     @Override
@@ -435,11 +431,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     @Override
     public void onStop() {
         super.onStop();
-        try {
-            vista.stop();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        vista.stop();
     }
 
     @Override
@@ -475,11 +467,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        try {
-            vista.sensorChanged(event);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+       vista.sensorChanged(event);
     }
 
     @Override
