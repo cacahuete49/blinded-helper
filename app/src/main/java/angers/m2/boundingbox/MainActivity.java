@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import angers.m2.boundingbox.form.WindowForm;
 import angers.m2.boundingbox.tools.Speaker;
 import angers.m2.boundingbox.tools.Vista;
 import angers.m2.boundingbox.form.DoorForm;
@@ -58,6 +59,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     class OneShotTask implements Runnable {
         Bitmap bmp;
 
+        OneShotTask(Mat src) {
+            this.bmp=Bitmap.createBitmap(src.cols(), src.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(src, this.bmp);
+        }
         OneShotTask(Bitmap b) {
             this.bmp = b;
         }
@@ -74,13 +79,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private Vista vista = new Vista();
 
-    private DoorForm doorsingleton;
+    private DoorForm doorSingleton;
+    private WindowForm windowSingleton;
 
     private ImageView image;
 
     private void initSingleton() {
-        doorsingleton = DoorForm.getInstance();
+        doorSingleton = DoorForm.getInstance();
+        windowSingleton = WindowForm.getInstance();
     }
+
 
     @Override
     protected void onDestroy() {
@@ -172,31 +180,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private TextToSpeech ttobj;
 
-    private long timer = 0;
-
     public void load_AND_display(Mat src) {
 
-
         findObstacle(src);
-        Mat tmp = new Mat();
-
-        Imgproc.cvtColor(src,tmp,Imgproc.COLOR_RGB2GRAY);
-        Imgproc.threshold(tmp, tmp, 192, 255, Imgproc.THRESH_BINARY);
-//        Imgproc.adaptiveThreshold(tmp,mRgba,255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY_INV, 19, 2);
-
-
-        tmp = findForm(src);
-
-        mRgba = tmp;
+        mRgba = findForm(src);
     }
 
     @NonNull
-    private Mat findForm(Mat src) {
+    private Mat findForm(Mat original) {
+        while (ttobj.isSpeaking()){}
         /** le calcul du range ce fait avec le retour du threshold
          * cf http://www.academypublisher.com/proc/isip09/papers/isip09p109.pdf
          * la valeur min est de maniere empirique la moitier.
          */
 
+        Mat src = original.clone();
         Mat tmp = new Mat();
         Mat threshold = new Mat();
         Imgproc.cvtColor(src, threshold, Imgproc.COLOR_RGB2GRAY, 1);
@@ -249,9 +247,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (l1 * l2 < src.height() * src.width() * 0.4 && l2 < src.width() * 0.95 && l1 < src.height() * 0.95) {
 
                 Scalar color = null;
-                if (doorsingleton.isRecognized(rotRect, mRgba)) {
-                    ttobj.speak("la porte est située en " + Speaker.locate(rotRect.center, mRgba), TextToSpeech.QUEUE_ADD, null, "findDoor");
+                if (doorSingleton.isRecognized(rotRect, tmp)) {
+//                    ttobj.speak("la porte est située en " + Speaker.locate(rotRect.center, mRgba), TextToSpeech.QUEUE_FLUSH, null, "findDoor");
+                    ttobj.speak("porte", TextToSpeech.QUEUE_FLUSH, null, "findDoor");
                     color = new Scalar(0, 0, 255);
+                } else if (windowSingleton.isRecognized(rotRect,original)) {
+                    color = new Scalar(0, 0, 255);
+//                    ttobj.speak("la fenêtre est située en " + Speaker.locate(rotRect.center, mRgba), TextToSpeech.QUEUE_FLUSH, null, "findWindows");
+                    ttobj.speak("fenêtre", TextToSpeech.QUEUE_FLUSH, null, "findWindows");
                 }
 
 
@@ -273,6 +276,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     /**
      * Calcul le Kmeans de la zone sous l'horizon pour mettre en avant les obstacles.
+     *
      * @param src entre de la camera
      */
     @NonNull
@@ -415,11 +419,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
 
-        load_AND_display(mRgba);
-
         try {
-            vista.cameraFrame(mRgba, 86f, 15, true);
-        } catch (Exception e) {
+            vista.cameraFrame(mRgba, 86f, 15f);
+            load_AND_display(mRgba);
+        } catch (Throwable e) {
             e.printStackTrace();
         }
 
