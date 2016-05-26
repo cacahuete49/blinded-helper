@@ -8,8 +8,11 @@ local.properties
 
 openCVLibrary310/openCVLibrary310.iml
 openCVLibrary310/build/
+*.iml
 *.xml
 *.class
+
+.gitignore
 
 # Ignore Gradle GUI config
 gradle-app.setting
