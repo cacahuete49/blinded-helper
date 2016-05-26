@@ -48,10 +48,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import angers.m2.boundingbox.form.WindowForm;
-import angers.m2.boundingbox.tools.Speaker;
-import angers.m2.boundingbox.tools.Vista;
 import angers.m2.boundingbox.form.DoorForm;
+import angers.m2.boundingbox.form.WindowForm;
+import angers.m2.boundingbox.tools.Vista;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, SensorEventListener {
 
@@ -60,9 +59,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Bitmap bmp;
 
         OneShotTask(Mat src) {
-            this.bmp=Bitmap.createBitmap(src.cols(), src.rows(), Bitmap.Config.ARGB_8888);
+            this.bmp = Bitmap.createBitmap(src.cols(), src.rows(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(src, this.bmp);
         }
+
         OneShotTask(Bitmap b) {
             this.bmp = b;
         }
@@ -74,15 +74,31 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     CameraBridgeViewBase cam0;
-
     private Mat mRgba;
-
     private Vista vista = new Vista();
 
     private DoorForm doorSingleton;
     private WindowForm windowSingleton;
 
     private ImageView image;
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS: {
+                    Log.i("opencv", "OpenCV loaded successfully");
+                    cam0.enableView();
+                    cam0.enableFpsMeter();
+                }
+                break;
+                default: {
+                    super.onManagerConnected(status);
+                }
+                break;
+            }
+        }
+    };
+    private TextToSpeech ttobj;
 
     private void initSingleton() {
         doorSingleton = DoorForm.getInstance();
@@ -160,26 +176,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     }
 
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
-        @Override
-        public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS: {
-                    Log.i("opencv", "OpenCV loaded successfully");
-                    cam0.enableView();
-                    cam0.enableFpsMeter();
-                }
-                break;
-                default: {
-                    super.onManagerConnected(status);
-                }
-                break;
-            }
-        }
-    };
-
-    private TextToSpeech ttobj;
-
     public void load_AND_display(Mat src) {
 
         findObstacle(src);
@@ -188,7 +184,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     @NonNull
     private Mat findForm(Mat original) {
-        while (ttobj.isSpeaking()){}
+        while (ttobj.isSpeaking()) {
+        }
         /** le calcul du range ce fait avec le retour du threshold
          * cf http://www.academypublisher.com/proc/isip09/papers/isip09p109.pdf
          * la valeur min est de maniere empirique la moitier.
@@ -251,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 //                    ttobj.speak("la porte est située en " + Speaker.locate(rotRect.center, mRgba), TextToSpeech.QUEUE_FLUSH, null, "findDoor");
                     ttobj.speak("porte", TextToSpeech.QUEUE_FLUSH, null, "findDoor");
                     color = new Scalar(0, 0, 255);
-                } else if (windowSingleton.isRecognized(rotRect,original)) {
+                } else if (windowSingleton.isRecognized(rotRect, original)) {
                     color = new Scalar(0, 0, 255);
 //                    ttobj.speak("la fenêtre est située en " + Speaker.locate(rotRect.center, mRgba), TextToSpeech.QUEUE_FLUSH, null, "findWindows");
                     ttobj.speak("fenêtre", TextToSpeech.QUEUE_FLUSH, null, "findWindows");
@@ -272,6 +269,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         }
         return tmp;
+    }
+
+    public void deleteInsideForm(List<MatOfPoint> listMatOfPoint) {
+
     }
 
     /**
@@ -441,4 +442,5 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
+
 }
