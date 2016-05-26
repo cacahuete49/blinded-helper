@@ -464,7 +464,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         mRgba = inputFrame.rgba();
 
         try {
-            vista.cameraFrame(mRgba, 86f, 15f);
+            vista.cameraFrame(mRgba, 90f);
             load_AND_display(mRgba);
         } catch (Throwable e) {
             e.printStackTrace();
