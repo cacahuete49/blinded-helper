@@ -6,7 +6,7 @@ app/app.iml
 gradlew
 local.properties
 
-*.iml
+openCVLibrary310/openCVLibrary310.iml
 openCVLibrary310/build/
 *.xml
 *.class
