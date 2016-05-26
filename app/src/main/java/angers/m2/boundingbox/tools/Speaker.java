@@ -1,32 +1,18 @@
 package angers.m2.boundingbox.tools;
 
+import android.app.Activity;
+
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
 import java.util.HashMap;
 
-/**
- * Created by cacahuete on 22/05/16.
- */
-public class Speaker {
+import angers.m2.boundingbox.R;
 
+public class Speaker {
 
     private static Speaker INSTANCE = null;
 
-    private final static String PORTE = "porte";
-    private final static String FENETRE = "fenetre";
-    private final static String OBSTACLE = "obstacle";
-    private final static String GAUCHE = "à gauche";
-    private final static String DROITE =  "à droite";
-    private final static String DEVANT = "devant";
-    private final static String CENTRE = "au centre";
-    private final static String DESSUS = "au dessus";
-    private final static String DESSOUS = "en dessous";
-    private final static String HAUT = "en haut";
-    private final static String Bas = "en bas";
-    private final static String ATTENTION = "Attention, ";
-    private final static String ILYA = "il y a ";
-    private final static String UNE = "une";
     private final static String ESPACE = " ";
 
     public final static int DOOR = 0;
@@ -39,45 +25,51 @@ public class Speaker {
     public final static int CENTER = 104;
     public final static int ABOVE = 105;
     public final static int BELOW = 106;
-    public final static int UP = 107;
-    public final static int DOWN = 108;
+    public final static int TOP = 107;
+    public final static int BOTTOM = 108;
+
+    private final static int WARNING = 200;
+    private final static int THEREARE = 201;
+    private final static int A = 202;
 
     private HashMap<Integer, String> map = new HashMap<>();
 
-    private Speaker() {
-        map.put(DOOR, PORTE);
-        map.put(WINDOW, FENETRE);
-        map.put(BLOCK, OBSTACLE);
+    private Speaker(Activity activity) {
+        map.put(DOOR, activity.getString(R.string.door));
+        map.put(WINDOW, activity.getString(R.string.window));
+        map.put(BLOCK, activity.getString(R.string.block));
 
-        map.put(LEFT, GAUCHE);
-        map.put(RIGHT, DROITE);
-        map.put(FRONT, DEVANT);
-        map.put(CENTER, CENTRE);
-        map.put(ABOVE, DESSUS);
-        map.put(BELOW, DESSOUS);
-        map.put(UP, HAUT);
-        map.put(DOWN, Bas);
+        map.put(LEFT, activity.getString(R.string.left));
+        map.put(RIGHT, activity.getString(R.string.right));
+        map.put(FRONT, activity.getString(R.string.front));
+        map.put(CENTER, activity.getString(R.string.center));
+        map.put(ABOVE, activity.getString(R.string.above));
+        map.put(BELOW, activity.getString(R.string.below));
+        map.put(TOP, activity.getString(R.string.top));
+        map.put(BOTTOM, activity.getString(R.string.bottom));
+
+        map.put(WARNING, activity.getString(R.string.warning));
+        map.put(THEREARE, activity.getString(R.string.there_are));
+        map.put(A, activity.getString(R.string.a));
     }
 
-    public static synchronized Speaker getInstance() {
+    public static synchronized Speaker getInstance(Activity activity) {
         if (INSTANCE == null) {
-            INSTANCE = new Speaker();
+            INSTANCE = new Speaker(activity);
         }
         return INSTANCE;
     }
 
     public String getText(int object, int number, int[] direction) {
-        getInstance();
-
         StringBuilder text = new StringBuilder();
 
         if (object == BLOCK) {
-            text.append(ATTENTION);
+            text.append(map.get(WARNING));
         }
-        text.append(ILYA);
+        text.append(map.get(THEREARE));
 
         if ((number == 1) && (object == DOOR || object == WINDOW)) {
-            text.append(UNE + ESPACE + map.get(object));
+            text.append(map.get(A) + ESPACE + map.get(object));
         } else {
             text.append(number + ESPACE + map.get(object));
         }

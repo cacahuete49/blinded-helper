@@ -1,4 +1,23 @@
 <resources>
     <string name="app_name">contour</string>
     <string name="action_settings">Settings</string>
+
+
+
+    <!-- Speaker -->
+    <string name="door">porte</string>
+    <string name="window">fenetre</string>
+    <string name="block">obstacle</string>
+    <string name="left">à gauche</string>
+    <string name="right">à droite</string>
+    <string name="front">devant</string>
+    <string name="center">au centre</string>
+    <string name="above">au dessus</string>
+    <string name="below">en dessous</string>
+    <string name="top">en haut</string>
+    <string name="bottom">en bas</string>
+    <string name="warning">Attention, </string>
+    <string name="there_are">il y a </string>
+    <string name="a">une</string>
+    <string name="space"> </string>
 </resources>
