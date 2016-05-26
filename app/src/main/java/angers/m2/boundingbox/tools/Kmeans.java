@@ -28,7 +28,6 @@ public class Kmeans {
 
         // Kmeans
         // Traitement
-        Imgproc.cvtColor(matResize, matResize, Imgproc.COLOR_BGR2RGB, 3);
         Imgproc.cvtColor(matResize, matResize, Imgproc.COLOR_RGB2HSV, 3);
         Imgproc.dilate(matResize, matResize, new Mat());
 
