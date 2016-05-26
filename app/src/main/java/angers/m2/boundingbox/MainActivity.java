@@ -3,6 +3,7 @@ package angers.m2.boundingbox;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -12,6 +13,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -44,9 +46,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import angers.m2.boundingbox.form.DoorForm;
 import angers.m2.boundingbox.form.WindowForm;
@@ -228,6 +232,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         });
 
+        deleteInsideForm(contours);
+
         for (int i = 0; i < 8 && i < contours.size(); i++) {
             MatOfPoint e = contours.get(i);
 
@@ -271,9 +277,45 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return tmp;
     }
 
-    public void deleteInsideForm(List<MatOfPoint> listMatOfPoint) {
+    public List<Rect> deleteInsideForm(List<MatOfPoint> listMatOfPoint) {
+        Point[] point1 = new Point[4];
+        Point[] point2 = new Point[4];
+
+        ArrayList<Boolean> test = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            test.add(true);
+        }
+
+        for (int i = 0; i < 8 && i < listMatOfPoint.size(); i++) {
+            RotatedRect rectA = Imgproc.minAreaRect(new MatOfPoint2f(listMatOfPoint.get(i).toArray()));
+
+            for (int j = i + 1; j < 8 && j < listMatOfPoint.size(); j++) {
+                RotatedRect rectB = Imgproc.minAreaRect(new MatOfPoint2f(listMatOfPoint.get(j).toArray()));
+
+                if (rectA.boundingRect().tl().x < rectB.boundingRect().br().x && rectA.boundingRect().br().x > rectB.boundingRect().tl().x &&
+                        rectA.boundingRect().tl().y < rectB.boundingRect().br().y && rectA.boundingRect().br().y > rectB.boundingRect().tl().y) {
+
+
+                    if (test.get(i)) {
+                        test.remove(i);
+                        test.add(i, false);
+                    }
+                    break;
+                }
+            }
+        }
+
+
+        for (boolean i : test)
+            Log.d("INTERSECT", i ? "YES" : "NO");
+
+            Log.d("INTERSECT", "\n\n\n");
+
+
+          return new ArrayList<>();
 
     }
+
 
     /**
      * Calcul le Kmeans de la zone sous l'horizon pour mettre en avant les obstacles.
@@ -404,6 +446,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onCameraViewStarted(int width, int height) {
         mRgba = new Mat();
         mRgba = new Mat(height, width, CvType.CV_8UC4);
+        Log.d("SIZE3:", width+"");
     }
 
     @Override
