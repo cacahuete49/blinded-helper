@@ -139,10 +139,10 @@ public class Vista {
             vista.width = margePixel;
 
             // Affichage du rectangle
-            Point point = new Point(valeur, 0);
+            /*Point point = new Point(valeur, 0);
             Point point2 = new Point(valeur, mat.height() - 1);
             Imgproc.rectangle(mat, new Point(vista.x, vista.y), new Point(vista.x + vista.width, vista.y + vista.height), new Scalar(255, 0, 0), 2);
-            Imgproc.line(mat, point, point2, new Scalar(255, 0, 0, 255), 3);
+            Imgproc.line(mat, point, point2, new Scalar(255, 0, 0, 255), 3);*/
 
         } else {
             Log.e(TAG, "Erreur, l'initialisation n'a pas été effectuée !");
