@@ -59,7 +59,7 @@ public class WindowForm extends AbstractForm {
                 Point tmp = rect.center.clone();
                 tmp.y = rect.center.y + (rect.size.width / 10.0f);
 
-                int pos = Vista.getPositionPoint(src, tmp);
+                int pos = Vista.getPositionPoint(tmp);
                 return pos == Vista.INSIDE && (Math.abs(rect.angle) < 15);
             }
         });
@@ -68,18 +68,28 @@ public class WindowForm extends AbstractForm {
             @Override
             public boolean assertConstraint(RotatedRect rect, Mat src) {
                 Rect rectTmp = rect.boundingRect();
-                Mat tmp = new Mat();
-                if (rectTmp.tl().x > 0 && rectTmp.tl().y > 0 && rectTmp.br().y < src.width() && rectTmp.br().x < src.height()) {
+
+                if (rectTmp.x < 0)
+                    rectTmp.x = 0;
+                if (rectTmp.y < 0)
+                    rectTmp.y = 0;
+                if (rectTmp.x+rectTmp.width > src.width() - 1)
+                    rectTmp.width = src.width() - 1-rectTmp.x;
+                if (rectTmp.y+rectTmp.height> src.height() - 1)
+                    rectTmp.height = src.height() - 1 - rectTmp.y;
+
+                Mat tmp = null;
+                try {
                     tmp = src.submat(rectTmp);
-                    Imgproc.resize(tmp, tmp, new Size(tmp.width() / 10, tmp.height() / 10));
-                    return Kmeans.getPercentMaxColor(tmp, tmp.size(), 2) < 80;
-                } else {
-                    Log.e("constraint", "Hold the door");
+                } catch (Exception e) {
+                    Log.e("constraint", " rect out of mat -> rectTmp:("+rectTmp.tl()+","+rectTmp.br()+") src:"+src.size());
+                    return false;
                 }
-                return false;
+                Imgproc.resize(tmp, tmp, new Size(tmp.width() / 10, tmp.height() / 10));
+                return Kmeans.getPercentMaxColor(tmp, tmp.size(), 2) < 80;
+
             }
         });
-
     }
 
 }
