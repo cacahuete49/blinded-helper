@@ -178,6 +178,14 @@ public class Vista {
         }
     }
 
+    /**
+    * Retourne le rectangle correspondant à l'horizon plus la marge d'erreur.
+    *
+    * @return Le rectangle correspondant à l'horizon plus la marge d'erreur.
+    */
+    public Rect getVista() {
+        return vista;
+    }
 
     /**
      * Vérifie si un point est contenu, au-dessus ou en dessous de l'horizon.
@@ -212,7 +220,7 @@ public class Vista {
     }
 
     /**
-     * Calcul une sous matrice de la matrice passé en paramétre en fonction de la position souhaité par rapport à l'horizon.
+     * Calcul une sous matrice de la matrice passée en paramétre en fonction de la position souhaité par rapport à l'horizon.
      *
      * @param mat      Matrice représentant la trame d'entrée de la caméra.
      * @param position 0 (contenu), 1 (au dessus) ou -1 (en dessous).
@@ -233,6 +241,13 @@ public class Vista {
         return mat;
     }
 
+    /**
+     * Calcul une sous matrice en dessous de la position d'un point passé en paramétre de la matrice.
+     *
+     * @param mat Matrice représentant la trame d'entrée de la caméra.
+     * @param p
+     * @return Une sous matrice de la matrice mat en fonction d'un point.
+     */
     public static Mat getSubMat(Mat mat, Point p) {
         if (p.x > 0 && p.x < mat.height()) {
             return mat.submat(0, mat.height() - 1, (int) p.x, mat.width() - 1);
@@ -241,12 +256,6 @@ public class Vista {
         Log.e(TAG, "Erreur la matrice n'a pas les bonnes dimensions !");
         return mat;
     }
-
-    public Rect getVista() {
-        return vista;
-    }
-
-
 
     /**
      * Calcul la moyenne du gyroscope.
