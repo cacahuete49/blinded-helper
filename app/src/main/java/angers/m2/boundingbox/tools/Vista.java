@@ -75,7 +75,6 @@ public class Vista {
                 CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
                 CameraCharacteristics characteristics = manager.getCameraCharacteristics(manager.getCameraIdList()[0]);
 
-                vista = new Rect(0, 0 , 0, 864);
                 angleVision = Math.toDegrees(2 * Math.atan(characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE).getWidth() / (2 * characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0])));
                 pileGyroscope = Collections.synchronizedList(new ArrayList());
             } else {
@@ -113,7 +112,7 @@ public class Vista {
 
     /**
      * Initialise la taille de frame et de la marge d'erreur.
-
+     *
      * @param width  Largeur de la frame.
      * @param height Hauteur de la frame.
      * @param height Hauteur de la frame.
@@ -121,6 +120,7 @@ public class Vista {
     public void cameraViewStarted(int width, int height, int percent) {
         margePixel = (int) (width * percent / 100);
         pixelByDegree = (int) (width / angleVision);
+        vista = new Rect(0, 0, 0, height);
     }
 
     /**
@@ -139,10 +139,10 @@ public class Vista {
             vista.width = margePixel;
 
             // Affichage du rectangle
-            /*Point point = new Point(valeur, 0);
-            Point point2 = new Point(valeur, mat.height() - 1);
-            Imgproc.rectangle(mat, new Point(vista.x, vista.y), new Point(vista.x + vista.width, vista.y + vista.height), new Scalar(255, 0, 0), 2);
-            Imgproc.line(mat, point, point2, new Scalar(255, 0, 0, 255), 3);*/
+//            Point point = new Point(valeur, 0);
+//            Point point2 = new Point(valeur, mat.height() - 1);
+//            Imgproc.rectangle(mat, new Point(vista.x, vista.y), new Point(vista.x + vista.width, vista.y + vista.height), new Scalar(255, 0, 0), 2);
+//            Imgproc.line(mat, point, point2, new Scalar(255, 0, 0, 255), 3);
 
         } else {
             Log.e(TAG, "Erreur, l'initialisation n'a pas été effectuée !");
@@ -164,7 +164,7 @@ public class Vista {
             if (accelerometreValues != null && magnetometreValues != null) {
                 SensorManager.getRotationMatrix(resultMatrix, null, accelerometreValues, magnetometreValues);
                 int rotation = ((WindowManager) activity.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
-                switch (rotation){
+                switch (rotation) {
                     case Surface.ROTATION_0:
                         SensorManager.remapCoordinateSystem(resultMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Y, resultMatrix2);
                         break;
@@ -231,15 +231,22 @@ public class Vista {
         if ((vista.x > 0) && (vista.x < mat.height())) {
             if (position == INSIDE) {
                 return mat.submat(vista);
-            } else if (position == EXTERN_UP) {
-                return mat.submat(0, mat.height()-1,0, vista.x);
-            } else {
-                return mat.submat(0, mat.height()-1,vista.x, mat.width()-1);
             }
-        } else {
-            Log.e(TAG, "Erreur la matrice n'a pas les bonnes dimensions !");
-            return mat;
         }
+        if (vista.x > 0 && vista.x < mat.height()) {
+            if (position == EXTERN_UP) {
+                return mat.submat(0, mat.height() - 1, 0, vista.x);
+            }
+        }
+        if (vista.x > 0 && vista.x+vista.width < mat.height()) {
+            if (position == EXTERN_DOWN) {
+                Log.d("submat", "from  :"+(vista.y + vista.width)+" to "+(mat.width() - 1));
+                return mat.submat(0, mat.height() - 1, vista.x + vista.width, mat.width() - 1);
+            }
+        }
+
+        Log.e(TAG, "Erreur la matrice n'a pas les bonnes dimensions !");
+        return mat;
     }
 
     /**
@@ -253,8 +260,8 @@ public class Vista {
 
         float currentAngle = 0;
         for (float f : pileGyroscopeCopy) {
-            currentAngle +=f;
+            currentAngle += f;
         }
-        return currentAngle /pileGyroscopeCopy.size();
+        return currentAngle / pileGyroscopeCopy.size();
     }
 }

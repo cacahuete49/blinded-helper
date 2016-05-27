@@ -3,6 +3,7 @@ package angers.m2.boundingbox.form;
 import android.util.Log;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvException;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
@@ -81,7 +82,7 @@ public class WindowForm extends AbstractForm {
                 Mat tmp = null;
                 try {
                     tmp = src.submat(rectTmp);
-                } catch (Exception e) {
+                } catch (CvException e) {
                     Log.e("constraint", " rect out of mat -> rectTmp:("+rectTmp.tl()+","+rectTmp.br()+") src:"+src.size());
                     return false;
                 }

@@ -244,7 +244,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             double l1 = rotRect.size.height;//Math.sqrt(Math.pow(vertices[1].x - vertices[0].x, 2) + Math.pow(vertices[1].y - vertices[0].y, 2));
             double l2 = rotRect.size.width;//Math.sqrt(Math.pow(vertices[1].x - vertices[2].x, 2) + Math.pow(vertices[1].y - vertices[2].y, 2));
 
-            if (l1 * l2 < src.height() * src.width() * 0.4 && l2 < src.width() * 0.95 && l1 < src.height() * 0.95) {
+            // controle sur la taille des objets pour éviter le bruit mis en boite
+            if (l1 * l2 < src.height() * src.width() * 0.6 && l2 < src.width() * 0.95 && l1 < src.height() * 0.95) {
 
                 Scalar color = null;
                 if (doorSingleton.isRecognized(rotRect, tmp)) {
@@ -328,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Mat tmp = new Mat();
         Mat resizedTmp = Vista.getSubMat(src, Vista.EXTERN_DOWN);
 
-        if (resizedTmp != null) {
+        if (resizedTmp.isSubmatrix()) {
             // pré traitement
             Mat resized = new Mat();
             Imgproc.resize(resizedTmp, resized, new Size(resizedTmp.size().width / 10, resizedTmp.size().height / 10));
@@ -394,12 +395,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             Mat tmpTest = new Mat();
             Imgproc.resize(clusters.get(maxNonZeroIndex), tmpTest, new Size(resizedTmp.size().width, resizedTmp.size().height));
-            Bitmap bmp = Bitmap.createBitmap(tmpTest.cols(), tmpTest.rows(), Bitmap.Config.ARGB_8888);
-
-            Utils.matToBitmap(tmpTest, bmp);
 
             // output
-            this.runOnUiThread(new OneShotTask(bmp));
+            this.runOnUiThread(new OneShotTask(tmpTest));
         }
     }
 
@@ -433,8 +431,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     @Override
     public void onCameraViewStarted(int width, int height) {
-        mRgba = new Mat();
         mRgba = new Mat(height, width, CvType.CV_8UC4);
+        vista.cameraViewStarted(width,height,20);
         Log.d("SIZE3:", width + "");
     }
 
@@ -463,7 +461,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         mRgba = inputFrame.rgba();
         try {
             load_AND_display(mRgba);
-            vista.cameraFrame(mRgba, 90f);
+            vista.cameraFrame(mRgba, 86f);
         } catch (Throwable e) {
             e.printStackTrace();
         }

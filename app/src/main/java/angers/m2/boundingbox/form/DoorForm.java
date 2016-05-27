@@ -2,6 +2,7 @@ package angers.m2.boundingbox.form;
 
 import android.util.Log;
 
+import org.opencv.core.CvException;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
@@ -74,12 +75,24 @@ public class DoorForm extends AbstractForm implements IForm {
             @Override
             public boolean assertConstraint(RotatedRect rect, Mat src) {
                 Rect rectTmp = rect.boundingRect();
-                if (rectTmp.tl().x>0 && rectTmp.tl().y>0 && rectTmp.br().x<src.width() && rectTmp.br().y<src.height())
-                    return Kmeans.getPercentMaxColor(src.submat(rectTmp))>80;
-                else {
-                    Log.e("constraint", "Hold the door");
+                if (rectTmp.x < 0)
+                    rectTmp.x = 0;
+                if (rectTmp.y < 0)
+                    rectTmp.y = 0;
+                if (rectTmp.x+rectTmp.width > src.width() - 1)
+                    rectTmp.width = src.width() - 1-rectTmp.x;
+                if (rectTmp.y+rectTmp.height> src.height() - 1)
+                    rectTmp.height = src.height() - 1 - rectTmp.y;
+
+                Mat tmp;
+                try {
+                    tmp = src.submat(rectTmp);
+                } catch (CvException e) {
+                    Log.e("constraint", " rect out of mat -> rectTmp:("+rectTmp.tl()+","+rectTmp.br()+") src:"+src.size());
+                    return false;
                 }
-                return false;
+
+                return Kmeans.getPercentMaxColor(tmp)>80;
             }
         });
 
