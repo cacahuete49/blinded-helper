@@ -219,26 +219,34 @@ public class Vista {
      * @return Une sous matrice de la matrice mat en fonction de la position.
      */
     public static Mat getSubMat(Mat mat, int position) {
-        if ((vista.x > 0) && (vista.x < mat.height())) {
-            if (position == INSIDE) {
-                return mat.submat(vista);
-            }
+        if (position == INSIDE && vista.x > 0 && vista.x < mat.height()) {
+            return mat.submat(vista);
         }
-        if (vista.x > 0 && vista.x < mat.height()) {
-            if (position == EXTERN_UP) {
-                return mat.submat(0, mat.height() - 1, 0, vista.x);
-            }
+        if (position == EXTERN_UP && vista.x > 0 && vista.x < mat.height()) {
+            return mat.submat(0, mat.height() - 1, 0, vista.x);
         }
-        if (vista.x > 0 && vista.x+vista.width < mat.height()) {
-            if (position == EXTERN_DOWN) {
-                Log.d("submat", "from  :"+(vista.y + vista.width)+" to "+(mat.width() - 1));
-                return mat.submat(0, mat.height() - 1, vista.x + vista.width, mat.width() - 1);
-            }
+        if (position == EXTERN_DOWN && vista.x > 0 && vista.x+vista.width < mat.height()) {
+            return mat.submat(0, mat.height() - 1, vista.x + vista.width, mat.width() - 1);
         }
 
         Log.e(TAG, "Erreur la matrice n'a pas les bonnes dimensions !");
         return mat;
     }
+
+    public static Mat getSubMat(Mat mat, Point p) {
+        if (p.x > 0 && p.x < mat.height()) {
+            return mat.submat(0, mat.height() - 1, (int) p.x, mat.width() - 1);
+        }
+
+        Log.e(TAG, "Erreur la matrice n'a pas les bonnes dimensions !");
+        return mat;
+    }
+
+    public Rect getVista() {
+        return vista;
+    }
+
+
 
     /**
      * Calcul la moyenne du gyroscope.
