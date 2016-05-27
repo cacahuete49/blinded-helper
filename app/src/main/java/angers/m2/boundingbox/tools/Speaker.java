@@ -34,6 +34,18 @@ public class Speaker {
 
     private HashMap<Integer, String> map = new HashMap<>();
 
+    /**
+     * Classe de gestion du Speaker.
+     *
+     * @author Quentin Rabineau / Mattieu Racine
+     * @version 1.0
+     */
+
+    /**
+     * Constructeur de la classe Speaker
+     *
+     * @param activity Activité Android à laquelle est rattaché la librairie.
+     */
     private Speaker(Activity activity) {
         map.put(DOOR, activity.getString(R.string.door));
         map.put(WINDOW, activity.getString(R.string.window));
@@ -53,6 +65,11 @@ public class Speaker {
         map.put(A, activity.getString(R.string.a));
     }
 
+    /**
+     * Initialise la classe Speaker en instanciant un singleton.
+     *
+     * @param activity Activité Android à laquelle est rattaché la librairie.
+     */
     public static synchronized Speaker getInstance(Activity activity) {
         if (INSTANCE == null) {
             INSTANCE = new Speaker(activity);
@@ -60,7 +77,17 @@ public class Speaker {
         return INSTANCE;
     }
 
-    public String getText(int object, int number, int[] direction) {
+
+    /**
+     * Construit la phrase correspondant à l'objet et à sa position dans la scène.
+     *
+     * @param object La nature de l'objet dont on détermine la position.
+     * @param number Le nombre d'objet dont on détermine la position.
+     * @param direction Les directions de l'objet.
+     *
+     * @return La phrase contenant le nom de l'objet, la position et son nombre.
+     */
+    private String getText(int object, int number, int[] direction) {
         StringBuilder text = new StringBuilder();
 
         if (object == BLOCK) {
@@ -87,25 +114,25 @@ public class Speaker {
      * @param src
      * @return
      */
-    public static String locate(Point p , Mat src) {
-        StringBuilder position = new StringBuilder();
-        if (p.x / (float) src.width() < 0.33f)
-            position.append("haut ");
-        else if (p.x / (float) src.width() > 0.66f)
-            position.append("bas ");
-        else
-            position.append("milieu ");
+    public String getLocation(int object, int number, Point p , Mat src) {
+        int [] direction = new int[2];
 
+        if (p.x / (float) src.width() < 0.33f) {
+            direction[0] = Speaker.TOP;
+        } else if (p.x / (float) src.width() > 0.66f) {
+            direction[0] = Speaker.BOTTOM;
+        } else {
+            direction[0] = Speaker.CENTER;
+        }
 
         if (p.y / (float) src.height() < 0.33f)
-            position.append("à droite ");
+            direction[1] = Speaker.RIGHT;
+        else if (p.y / (float) src.height() > 0.66f)
+            direction[1] = Speaker.LEFT;
         else
-        if (p.y / (float) src.height() > 0.66f)
-            position.append("à gauche ");
-        else
-            position.append("centre ");
+            direction[1] = Speaker.FRONT;
 
-        return position.toString();
+        return getText(object, number, direction);
     }
 
 }

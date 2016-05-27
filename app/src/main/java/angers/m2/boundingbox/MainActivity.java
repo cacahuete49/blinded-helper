@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         });
 
-        deleteInsideForm(contours);
+        deleteInsideForm(contours, 8);
 
         for (int i = 0; i < 5 && i < contours.size(); i++) {
             MatOfPoint e = contours.get(i);
@@ -275,19 +275,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return tmp;
     }
 
-    public List<Rect> deleteInsideForm(List<MatOfPoint> listMatOfPoint) {
+
+
+    public List<Rect> deleteInsideForm(List<MatOfPoint> listMatOfPoint, int max) {
         Point[] point1 = new Point[4];
         Point[] point2 = new Point[4];
 
         ArrayList<Boolean> test = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < max; i++) {
             test.add(true);
         }
 
-        for (int i = 0; i < 8 && i < listMatOfPoint.size(); i++) {
+        for (int i = 0; i < max && i < listMatOfPoint.size(); i++) {
             RotatedRect rectA = Imgproc.minAreaRect(new MatOfPoint2f(listMatOfPoint.get(i).toArray()));
 
-            for (int j = i + 1; j < 8 && j < listMatOfPoint.size(); j++) {
+            for (int j = i + 1; j < max && j < listMatOfPoint.size(); j++) {
                 RotatedRect rectB = Imgproc.minAreaRect(new MatOfPoint2f(listMatOfPoint.get(j).toArray()));
 
                 if (rectA.boundingRect().tl().x < rectB.boundingRect().br().x && rectA.boundingRect().br().x > rectB.boundingRect().tl().x &&
@@ -312,6 +314,29 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         return new ArrayList<>();
 
+    }
+
+    public ArrayList<RotatedRect> getSortListForm(List<MatOfPoint> listMatOfPoint, int max) {
+        ArrayList<RotatedRect> listForm = new ArrayList<>();
+
+        for (int i = 0; i < max && i < listMatOfPoint.size(); i++) {
+            listForm.add(Imgproc.minAreaRect(new MatOfPoint2f(listMatOfPoint.get(i).toArray())));
+        }
+
+        Collections.sort(listForm, new Comparator<RotatedRect>() {
+            @Override
+            public int compare(RotatedRect rectA, RotatedRect rectB) {
+                if (rectA.center.y < rectB.center.y) {
+                    return -1;
+                } else if (rectA.center.y > rectB.center.y) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        });
+
+        return listForm;
     }
 
 
@@ -460,8 +485,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
         mRgba = inputFrame.rgba();
         try {
+            vista.cameraFrame(mRgba, 90f);
             load_AND_display(mRgba);
-            vista.cameraFrame(mRgba, 86f);
         } catch (Throwable e) {
             e.printStackTrace();
         }

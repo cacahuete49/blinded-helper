@@ -16,8 +16,6 @@ import android.view.WindowManager;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -112,10 +110,10 @@ public class Vista {
 
     /**
      * Initialise la taille de frame et de la marge d'erreur.
-     *
+
      * @param width  Largeur de la frame.
      * @param height Hauteur de la frame.
-     * @param height Hauteur de la frame.
+     * @param percent Pourcentage de la marge d'erreur
      */
     public void cameraViewStarted(int width, int height, int percent) {
         margePixel = (int) (width * percent / 100);
@@ -137,13 +135,6 @@ public class Vista {
             // Modification du rectangle correspondant à la ligne d'horizon + la marge d'erreur
             vista.x = valeur - (margePixel / 2);
             vista.width = margePixel;
-
-            // Affichage du rectangle
-//            Point point = new Point(valeur, 0);
-//            Point point2 = new Point(valeur, mat.height() - 1);
-//            Imgproc.rectangle(mat, new Point(vista.x, vista.y), new Point(vista.x + vista.width, vista.y + vista.height), new Scalar(255, 0, 0), 2);
-//            Imgproc.line(mat, point, point2, new Scalar(255, 0, 0, 255), 3);
-
         } else {
             Log.e(TAG, "Erreur, l'initialisation n'a pas été effectuée !");
         }
