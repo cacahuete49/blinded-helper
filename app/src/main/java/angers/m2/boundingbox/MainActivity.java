@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         deleteInsideForm(contours);
 
-        for (int i = 0; i < 8 && i < contours.size(); i++) {
+        for (int i = 0; i < 5 && i < contours.size(); i++) {
             MatOfPoint e = contours.get(i);
 
             // boite englobante
@@ -306,10 +306,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         for (boolean i : test)
             Log.d("INTERSECT", i ? "YES" : "NO");
 
-            Log.d("INTERSECT", "\n\n\n");
+        Log.d("INTERSECT", "\n\n\n");
 
 
-          return new ArrayList<>();
+        return new ArrayList<>();
 
     }
 
@@ -435,7 +435,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onCameraViewStarted(int width, int height) {
         mRgba = new Mat();
         mRgba = new Mat(height, width, CvType.CV_8UC4);
-        Log.d("SIZE3:", width+"");
+        Log.d("SIZE3:", width + "");
     }
 
     @Override
@@ -448,13 +448,22 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         mRgba.release();
     }
 
+    int fps = 0;
+    long timer = SystemClock.currentThreadTimeMillis();
+
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        if (SystemClock.currentThreadTimeMillis() - timer > 1000) {
+            Log.i("FPS", "FPS:" + fps);
+            fps = 0;
+            timer = SystemClock.currentThreadTimeMillis();
+        } else {
+            fps++;
+        }
         mRgba = inputFrame.rgba();
-
         try {
-            vista.cameraFrame(mRgba, 90f);
             load_AND_display(mRgba);
+            vista.cameraFrame(mRgba, 90f);
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -464,7 +473,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-       vista.sensorChanged(event);
+        vista.sensorChanged(event);
     }
 
     @Override
