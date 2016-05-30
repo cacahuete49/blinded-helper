@@ -2,7 +2,6 @@ package angers.m2.boundingbox.debug;
 
 import android.graphics.Bitmap;
 import android.os.Environment;
-import android.util.Log;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
