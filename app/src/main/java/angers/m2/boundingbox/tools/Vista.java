@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import org.opencv.core.CvException;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
@@ -110,9 +111,9 @@ public class Vista {
 
     /**
      * Initialise la taille de frame et de la marge d'erreur.
-
-     * @param width  Largeur de la frame.
-     * @param height Hauteur de la frame.
+     *
+     * @param width   Largeur de la frame.
+     * @param height  Hauteur de la frame.
      * @param percent Pourcentage de la marge d'erreur
      */
     public void cameraViewStarted(int width, int height, int percent) {
@@ -179,11 +180,11 @@ public class Vista {
     }
 
     /**
-    * Retourne le rectangle correspondant à l'horizon plus la marge d'erreur.
-    *
-    * @return Le rectangle correspondant à l'horizon plus la marge d'erreur.
-    */
-    public Rect getVista() {
+     * Retourne le rectangle correspondant à l'horizon plus la marge d'erreur.
+     *
+     * @return Le rectangle correspondant à l'horizon plus la marge d'erreur.
+     */
+    public static Rect getVista() {
         return vista;
     }
 
@@ -227,16 +228,20 @@ public class Vista {
      * @return Une sous matrice de la matrice mat en fonction de la position.
      */
     public static Mat getSubMat(Mat mat, int position) {
-        if (position == INSIDE && vista.x > 0 && vista.x < mat.height()) {
-            return mat.submat(vista);
+        try {
+            if (position == INSIDE && vista.x > 0 && vista.x < mat.height()) {
+                return mat.submat(vista);
+            }
+            if (position == EXTERN_UP && vista.x > 0 && vista.x < mat.height()) {
+                return mat.submat(0, mat.height() - 1, 0, vista.x);
+            }
+            if (position == EXTERN_DOWN && vista.x > 0 && vista.x + vista.width < mat.height()) {
+                return mat.submat(0, mat.height() - 1, vista.x + vista.width, mat.width() - 1);
+            }
+        } catch (CvException e) {
+            Log.e("CvException", "bad submat");
+            Log.getStackTraceString(e);
         }
-        if (position == EXTERN_UP && vista.x > 0 && vista.x < mat.height()) {
-            return mat.submat(0, mat.height() - 1, 0, vista.x);
-        }
-        if (position == EXTERN_DOWN && vista.x > 0 && vista.x+vista.width < mat.height()) {
-            return mat.submat(0, mat.height() - 1, vista.x + vista.width, mat.width() - 1);
-        }
-
         Log.e(TAG, "Erreur la matrice n'a pas les bonnes dimensions !");
         return mat;
     }
@@ -249,11 +254,14 @@ public class Vista {
      * @return Une sous matrice de la matrice mat en fonction d'un point.
      */
     public static Mat getSubMat(Mat mat, Point p) {
-        if (p.x > 0 && p.x < mat.height()) {
-            return mat.submat(0, mat.height() - 1, (int) p.x, mat.width() - 1);
+        try {
+            if (p.inside(new Rect(new Point(),mat.size()))) {
+                return mat.submat(0, mat.height() - 1, (int) p.x, mat.width() - 1);
+            }
+        } catch (CvException e) {
+            Log.e("CvException", "bad submat");
+            Log.getStackTraceString(e);
         }
-
-        Log.e(TAG, "Erreur la matrice n'a pas les bonnes dimensions !");
         return mat;
     }
 
