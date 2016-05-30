@@ -21,6 +21,7 @@ import android.util.SizeF;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.Locale;
 
 import angers.m2.boundingbox.algo.Algorithm;
+import angers.m2.boundingbox.debug.Tools;
 import angers.m2.boundingbox.tools.MatComparator;
 import angers.m2.boundingbox.tools.Vista;
 
