@@ -17,6 +17,7 @@ import org.opencv.core.CvException;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Size;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +41,7 @@ public class Vista {
 
     private int margePixel;
     private int pixelByDegree;
+    private Size size;
 
     private static Rect vista;
 
@@ -117,21 +119,21 @@ public class Vista {
      * @param percent Pourcentage de la marge d'erreur
      */
     public void cameraViewStarted(int width, int height, int percent) {
-        margePixel = (int) (width * percent / 100);
+        margePixel = (width * percent / 100);
         pixelByDegree = (int) (width / angleVision);
+        size = new Size(width, height);
         vista = new Rect(0, 0, 0, height);
     }
 
     /**
      * Calcul l'horizon en fonction de la position du téléphone.
      *
-     * @param mat            Matrice repr&eacute;sentant la trame d'entr&eacute;e de la cam&eacute;ra.
      * @param angleCalibrage Angle du t&eacute;l&eacute;phone pour le calibrage de la librarie.
      */
-    public void cameraFrame(Mat mat, float angleCalibrage) {
+    public void cameraFrame(float angleCalibrage) {
         if (activity != null) {
             // Calcul de la valeur de l'horizon
-            int valeur = (int) ((getAverageGyroscope() + angleCalibrage) * pixelByDegree + (mat.width() / 2));
+            int valeur = (int) ((getAverageGyroscope() + angleCalibrage) * pixelByDegree + (size.width / 2));
 
             // Modification du rectangle correspondant à la ligne d'horizon + la marge d'erreur
             vista.x = valeur - (margePixel / 2);
