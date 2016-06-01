@@ -20,10 +20,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import angers.m2.boundingbox.MainActivity;
 import angers.m2.boundingbox.form.DoorForm;
 import angers.m2.boundingbox.form.WindowForm;
 import angers.m2.boundingbox.tools.Kmeans;
 import angers.m2.boundingbox.tools.MatComparator;
+import angers.m2.boundingbox.tools.Speaker;
 import angers.m2.boundingbox.tools.Vista;
 
 /**
@@ -31,7 +33,7 @@ import angers.m2.boundingbox.tools.Vista;
  */
 public class Algorithm {
 
-    public static Mat formRecognition(Mat original, TextToSpeech ttobj) {
+    public static Mat formRecognition(Mat original, Speaker speaker) {
         /** le calcul du range ce fait avec le retour du threshold
          * cf http://www.academypublisher.com/proc/isip09/papers/isip09p109.pdf
          * la valeur min est de maniere empirique la moitier.
@@ -58,7 +60,8 @@ public class Algorithm {
         Collections.sort(contours, new MatComparator());
 
         int maxElement = 5;
-//        deleteInsideForm(contours, maxElement);
+        deleteInsideForm(contours, maxElement);
+
         for (int i = 0; i < maxElement && i < contours.size(); i++) {
             MatOfPoint e = contours.get(i);
 
@@ -75,13 +78,11 @@ public class Algorithm {
 
                 Scalar color = null;
                 if (DoorForm.getInstance().isRecognized(rotRect, tmp)) {
-//                    ttobj.speak("la porte est située en " + Speaker.locate(rotRect.center, mRgba), TextToSpeech.QUEUE_FLUSH, null, "findDoor");
-                    ttobj.speak("porte", TextToSpeech.QUEUE_FLUSH, null, "findDoor");
+                    MainActivity.obstacle.add(speaker.getLocation(Speaker.DOOR, 1, rotRect.center, tmp));
                     color = new Scalar(0, 0, 255);
                 } else if (WindowForm.getInstance().isRecognized(rotRect, original)) {
                     color = new Scalar(0, 0, 255);
-//                    ttobj.speak("la fenêtre est située en " + Speaker.locate(rotRect.center, mRgba), TextToSpeech.QUEUE_FLUSH, null, "findWindows");
-                    ttobj.speak("fenêtre", TextToSpeech.QUEUE_FLUSH, null, "findWindows");
+                    MainActivity.obstacle.add(speaker.getLocation(Speaker.WINDOW, 1, rotRect.center, tmp));
                 }
 
 
@@ -158,41 +159,34 @@ public class Algorithm {
     }
 
 
-    public static List<Rect> deleteInsideForm(List<MatOfPoint> listMatOfPoint, int max) {
-        Point[] point1 = new Point[4];
-        Point[] point2 = new Point[4];
-
-        ArrayList<Boolean> test = new ArrayList<>();
-        Collections.fill(test, true);
-
+    /**
+     * @param listMatOfPoint
+     * @param max
+     */
+    public static void deleteInsideForm(List<MatOfPoint> listMatOfPoint, int max) {
         for (int i = 0; i < max && i < listMatOfPoint.size(); i++) {
-            RotatedRect rectA = Imgproc.minAreaRect(new MatOfPoint2f(listMatOfPoint.get(i).toArray()));
+            Rect rect1 = Imgproc.boundingRect(listMatOfPoint.get(i));
+            int x11 = (int) rect1.tl().x;
+            int y11 = (int) rect1.tl().y;
+            int x12 = x11 + rect1.width;
+            int y12 = y11 + rect1.height;
 
             for (int j = i + 1; j < max && j < listMatOfPoint.size(); j++) {
-                RotatedRect rectB = Imgproc.minAreaRect(new MatOfPoint2f(listMatOfPoint.get(j).toArray()));
+                Rect rect2 = Imgproc.boundingRect(listMatOfPoint.get(j));
+                int x21 = (int) rect2.tl().x;
+                int y21 = (int) rect2.tl().y;
+                int x22 = x21 + rect2.width;
+                int y22 = y21 + rect2.height;
 
-                if (rectA.boundingRect().tl().x < rectB.boundingRect().br().x && rectA.boundingRect().br().x > rectB.boundingRect().tl().x &&
-                        rectA.boundingRect().tl().y < rectB.boundingRect().br().y && rectA.boundingRect().br().y > rectB.boundingRect().tl().y) {
+                int x_overlap = Math.max(0, Math.min(x12, x22) - Math.max(x11, x21));
+                int y_overlap = Math.max(0, Math.min(y12, y22) - Math.max(y11, y21));
 
-
-                    if (test.get(i)) {
-                        test.remove(i);
-                        test.add(i, false);
-                    }
-                    break;
+                if ((x_overlap * y_overlap) >= (rect2.area() * 0.80)) {
+                    listMatOfPoint.remove(listMatOfPoint.get(j));
+                    Log.d("OVERLOAP", x_overlap * y_overlap + " - " + rect2.area());
                 }
             }
         }
-
-
-        for (boolean i : test)
-            Log.d("INTERSECT", i ? "YES" : "NO");
-
-        Log.d("INTERSECT", "\n\n\n");
-
-
-        return new ArrayList<>();
-
     }
 
     public static ArrayList<RotatedRect> getSortListForm(List<MatOfPoint> listMatOfPoint, int max) {

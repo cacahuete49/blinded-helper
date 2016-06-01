@@ -12,6 +12,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
@@ -20,8 +21,10 @@ import android.util.Log;
 import android.util.SizeF;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -41,13 +44,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import angers.m2.boundingbox.algo.Algorithm;
-import angers.m2.boundingbox.debug.Tools;
 import angers.m2.boundingbox.tools.MatComparator;
+import angers.m2.boundingbox.tools.Speaker;
 import angers.m2.boundingbox.tools.Vista;
 
-public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, SensorEventListener {
+public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, SensorEventListener, View.OnTouchListener {
 
     // TODO a jeter après les test
     class OneShotTask implements Runnable {
@@ -69,8 +74,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     CameraBridgeViewBase cam0;
     private Mat mRgba;
     private Vista vista = new Vista();
+    private Speaker speaker;
+    private TextToSpeech ttobj;
+    private Timer time;
+    private TimerTask timeTask;
+    private final Handler handler = new Handler();
+    public static ArrayList<String> obstacle = new ArrayList<>();
 
-    private ImageView image;
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -90,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         }
     };
-    private TextToSpeech ttobj;
+
 
     @Override
     protected void onDestroy() {
@@ -103,12 +113,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        LinearLayout screen = (LinearLayout) findViewById(R.id.screen);
+        screen.setOnTouchListener(this);
+
         cam0 = (CameraBridgeViewBase) findViewById(R.id.java_surface_view0);
         cam0.setCvCameraViewListener(this);
 
-        image = (ImageView) findViewById(R.id.imageView);
-
+        speaker = Speaker.getInstance(this);
         vista.initialize(this);
+        time = new Timer();
+        initializeTimerTask();
 
         // init camera2
         CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
@@ -166,12 +181,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     @NonNull
     private Mat findForm(Mat original) {
-        while (ttobj.isSpeaking()) {
-        }
-
-        Mat tmp = Algorithm.formRecognition(original, ttobj);
-
-        return tmp;
+        return Algorithm.formRecognition(original, speaker);
     }
 
 
@@ -271,8 +281,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
         mRgba = inputFrame.rgba();
 //        try {
-        vista.cameraFrame(86f);
-        //load_AND_display(mRgba);
+        vista.cameraFrame(mRgba, 90);
+
+        load_AND_display(mRgba);
 //        } catch (Throwable e) {
 //            Log.getStackTraceString(e);
 //        }
@@ -289,4 +300,33 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        startTimer();
+        return false;
+    }
+
+    public void startTimer() {
+        obstacle.clear();
+        time.schedule(timeTask, 5000);
+    }
+
+    public void initializeTimerTask() {
+        timeTask = new TimerTask() {
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        if (obstacle.size() == 0)
+                            ttobj.speak("Aucun objet n'a été détecté !", TextToSpeech.QUEUE_FLUSH, null, "none");
+                        else {
+                            for (String o : obstacle) {
+                                ttobj.speak(o, TextToSpeech.QUEUE_FLUSH, null, "findObject");
+                                while (ttobj.isSpeaking()){}
+                            }
+                        }
+                    }
+                });
+            }
+        };
+    }
 }

@@ -64,7 +64,8 @@ public class DoorForm extends AbstractForm implements IForm {
         constraints.add(new IConstraint() {
             @Override
             public boolean assertConstraint(RotatedRect rect, Mat src) {
-                return Vista.getPositionPoint( rect.center) == Vista.INSIDE && (Math.abs(rect.angle) < 15);
+                Log.d("VISTA_POSITION", (Vista.getPositionPoint(rect.center) == Vista.INSIDE)+" - "+(Math.abs(rect.angle) < 15));
+                return Vista.getPositionPoint(rect.center) == Vista.INSIDE && (Math.abs(rect.angle) < 15);
             }
         });
 
