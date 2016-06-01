@@ -17,7 +17,9 @@ import org.opencv.core.CvException;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -128,12 +130,13 @@ public class Vista {
     /**
      * Calcul l'horizon en fonction de la position du téléphone.
      *
+     * @param mat            Matrice repr&eacute;sentant la trame d'entr&eacute;e de la cam&eacute;ra.
      * @param angleCalibrage Angle du t&eacute;l&eacute;phone pour le calibrage de la librarie.
      */
-    public void cameraFrame(float angleCalibrage) {
+    public void cameraFrame(Mat mat, float angleCalibrage) {
         if (activity != null) {
             // Calcul de la valeur de l'horizon
-            int valeur = (int) ((getAverageGyroscope() + angleCalibrage) * pixelByDegree + (size.width / 2));
+            int valeur = (int) ((getAverageGyroscope() + angleCalibrage) * pixelByDegree + (mat.width() / 2));
 
             // Modification du rectangle correspondant à la ligne d'horizon + la marge d'erreur
             vista.x = valeur - (margePixel / 2);
