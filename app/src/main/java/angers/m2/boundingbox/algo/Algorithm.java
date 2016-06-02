@@ -59,7 +59,7 @@ public class Algorithm {
 
         Collections.sort(contours, new MatComparator());
 
-        int maxElement = 5;
+        int maxElement = 8;
         deleteInsideForm(contours, maxElement);
 
         for (int i = 0; i < maxElement && i < contours.size(); i++) {
@@ -166,24 +166,23 @@ public class Algorithm {
     public static void deleteInsideForm(List<MatOfPoint> listMatOfPoint, int max) {
         for (int i = 0; i < max && i < listMatOfPoint.size(); i++) {
             Rect rect1 = Imgproc.boundingRect(listMatOfPoint.get(i));
-            int x11 = (int) rect1.tl().x;
-            int y11 = (int) rect1.tl().y;
-            int x12 = x11 + rect1.width;
-            int y12 = y11 + rect1.height;
+            int tlxRect1 = (int) rect1.tl().x;
+            int tlyRect1 = (int) rect1.tl().y;
+            int widthRect1 = tlxRect1 + rect1.width;
+            int HeightRect1 = tlyRect1 + rect1.height;
 
             for (int j = i + 1; j < max && j < listMatOfPoint.size(); j++) {
                 Rect rect2 = Imgproc.boundingRect(listMatOfPoint.get(j));
-                int x21 = (int) rect2.tl().x;
-                int y21 = (int) rect2.tl().y;
-                int x22 = x21 + rect2.width;
-                int y22 = y21 + rect2.height;
+                int tlxRect2 = (int) rect2.tl().x;
+                int tlyRect2 = (int) rect2.tl().y;
+                int widthRect2 = tlxRect2 + rect2.width;
+                int HeightRect2 = tlyRect2 + rect2.height;
 
-                int x_overlap = Math.max(0, Math.min(x12, x22) - Math.max(x11, x21));
-                int y_overlap = Math.max(0, Math.min(y12, y22) - Math.max(y11, y21));
+                int x_overlap = Math.max(0, Math.min(widthRect1, widthRect2) - Math.max(tlxRect1, tlxRect2));
+                int y_overlap = Math.max(0, Math.min(HeightRect1, HeightRect2) - Math.max(tlyRect1, tlyRect2));
 
                 if ((x_overlap * y_overlap) >= (rect2.area() * 0.80)) {
                     listMatOfPoint.remove(listMatOfPoint.get(j));
-                    Log.d("OVERLOAP", x_overlap * y_overlap + " - " + rect2.area());
                 }
             }
         }

@@ -296,19 +296,24 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public void startTimer() {
         obstacle.clear();
+        final boolean[] hasSpeak = {false};
         ttobj.speak("Détection en cours !", TextToSpeech.QUEUE_FLUSH, null, "none");
         new CountDownTimer(5000, 1000) {
             public void onTick(long millisUntilFinished) {
+                if (obstacle.size() > 0) {
+                    hasSpeak[0] = true;
+                }
             }
 
             public void onFinish() {
-                ArrayList<String> obstacleTmp = new ArrayList<String>(obstacle);
-                if (obstacleTmp.size() == 0)
+                if (!hasSpeak[0]) {
                     ttobj.speak("Aucun objet n'a été détecté !", TextToSpeech.QUEUE_FLUSH, null, "none");
-                else {
-                    for (String o : obstacleTmp) {
-                        ttobj.speak(o, TextToSpeech.QUEUE_FLUSH, null, "findObject");
-                        while (ttobj.isSpeaking()){}
+                } else {
+                    ArrayList<String> obstacleTmp = new ArrayList<String>(obstacle);
+                        for (String o : obstacleTmp) {
+                            ttobj.speak(o, TextToSpeech.QUEUE_FLUSH, null, "findObject");
+                            while (ttobj.isSpeaking()) {
+                            }
                     }
                 }
             }
