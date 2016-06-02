@@ -8,6 +8,8 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 
+import java.util.Arrays;
+
 import angers.m2.boundingbox.form.constraint.IConstraint;
 import angers.m2.boundingbox.tools.Kmeans;
 import angers.m2.boundingbox.tools.Vista;
@@ -36,7 +38,9 @@ public class DoorForm extends AbstractForm implements IForm {
             public boolean assertConstraint(RotatedRect rect, Mat src) {
                 float aspectRatio = (float) rect.size.height / (float) rect.size.width;
                 float tolerance = 0.7f;
-                return (aspectRatio >= 0.37 * tolerance && aspectRatio <= 0.45 && Math.abs(rect.angle) < 45);
+                boolean output = (aspectRatio >= 0.37 * tolerance && aspectRatio * tolerance <= 0.45 && Math.abs(rect.angle) < 45);
+                Log.d("constraint","proportion :"+output);
+                return output;
             }
         });
 
@@ -54,7 +58,9 @@ public class DoorForm extends AbstractForm implements IForm {
                     if (p.x < tolerance || p.x > src.width() - tolerance || p.y < tolerance || p.y > src.height() - tolerance)
                         count++;
                 }
-                return count < 2;
+                boolean output = count < 2;
+                Log.d("constraint","trop proche"+ Arrays.toString(points)+" :"+output);
+                return output;
             }
         });
 
@@ -64,8 +70,14 @@ public class DoorForm extends AbstractForm implements IForm {
         constraints.add(new IConstraint() {
             @Override
             public boolean assertConstraint(RotatedRect rect, Mat src) {
+<<<<<<< 36828be9c9d4d738e1a5e309adfebc87a1defadd
                 Log.d("VISTA_POSITION", (Vista.getPositionPoint(rect.center) == Vista.INSIDE)+" - "+(Math.abs(rect.angle) < 15));
                 return Vista.getPositionPoint(rect.center) == Vista.INSIDE && (Math.abs(rect.angle) < 15);
+=======
+                boolean output = Vista.getPositionPoint(rect.center) == Vista.INSIDE && (Math.abs(rect.angle) < 15);
+                Log.d("constraint","vista("+rect.center+" :"+output);
+                return output;
+>>>>>>> nettoyage et mise en place des logs
             }
         });
 
@@ -80,20 +92,23 @@ public class DoorForm extends AbstractForm implements IForm {
                     rectTmp.x = 0;
                 if (rectTmp.y < 0)
                     rectTmp.y = 0;
-                if (rectTmp.x+rectTmp.width > src.width() - 1)
-                    rectTmp.width = src.width() - 1-rectTmp.x;
-                if (rectTmp.y+rectTmp.height> src.height() - 1)
+                if (rectTmp.x + rectTmp.width > src.width() - 1)
+                    rectTmp.width = src.width() - 1 - rectTmp.x;
+                if (rectTmp.y + rectTmp.height > src.height() - 1)
                     rectTmp.height = src.height() - 1 - rectTmp.y;
 
                 Mat tmp;
                 try {
                     tmp = src.submat(rectTmp);
                 } catch (CvException e) {
-                    Log.e("constraint", " rect out of mat -> rectTmp:("+rectTmp.tl()+","+rectTmp.br()+") src:"+src.size());
+                    Log.e("constraint", " rect out of mat -> rectTmp:(" + rectTmp.tl() + "," + rectTmp.br() + ") src:" + src.size());
                     return false;
                 }
+                float percent = Kmeans.getPercentMaxColor(tmp,tmp.size(),2);
+                boolean output =  percent > 80;
+                Log.d("constraint","kmeans "+percent+"% :"+output);
+                return output;
 
-                return Kmeans.getPercentMaxColor(tmp)>80;
             }
         });
 

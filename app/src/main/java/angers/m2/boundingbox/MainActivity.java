@@ -17,6 +17,7 @@ import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Layout;
 import android.util.Log;
 import android.util.SizeF;
 import android.view.Menu;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.Locale;
 
 import angers.m2.boundingbox.algo.Algorithm;
+import angers.m2.boundingbox.debug.Tools;
 import angers.m2.boundingbox.tools.MatComparator;
 import angers.m2.boundingbox.tools.Speaker;
 import angers.m2.boundingbox.tools.Vista;
@@ -73,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private Mat mRgba;
     private Vista vista = new Vista();
     private Speaker speaker;
-    private TextToSpeech ttobj;
     public static ArrayList<String> obstacle = new ArrayList<>();
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -96,6 +97,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     };
 
+    private TextToSpeech ttobj;
+    private boolean clic = false;
 
     @Override
     protected void onDestroy() {
@@ -174,7 +177,22 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     @NonNull
     private Mat findForm(Mat original) {
-        return Algorithm.formRecognition(original, speaker);
+        if (clic) {
+            Tools.writeBitMap(original, "0 - original");
+        }
+
+        Mat tmp = Algorithm.formRecognition(original, speaker, clic);
+        clic = false;
+
+        while (ttobj.isSpeaking()) {
+            // decommenter pour écrire les images
+            // clic=true;
+        }
+        if (clic) {
+            Tools.writeBitMap(tmp, "5 - final");
+        }
+
+        return tmp;
     }
 
 
@@ -272,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             fps++;
         }
         mRgba = inputFrame.rgba();
-        vista.cameraFrame(90);
+        vista.cameraFrame(86f);
         load_AND_display(mRgba);
 
         return mRgba;
@@ -299,14 +317,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         ttobj.speak("Détection en cours !", TextToSpeech.QUEUE_FLUSH, null, "none");
         new CountDownTimer(8000, 1000) {
             public void onTick(long millisUntilFinished) {
-                ArrayList<String> obstacleTmp = new ArrayList<String>(obstacle);
+                ArrayList<String> obstacleTmp = new ArrayList<>(obstacle);
                 obstacle.clear();
-                for (String o : obstacleTmp) {
-                    ttobj.speak(o, TextToSpeech.QUEUE_FLUSH, null, "findObject");
-                    while (ttobj.isSpeaking()) {}
-                }
+                if (!ttobj.isSpeaking())
+                    for (String o : obstacleTmp) {
+                        ttobj.speak(o, TextToSpeech.QUEUE_ADD, null, "findObject");
+                    }
 
-                if (obstacleTmp.size()>0) {
+                if (obstacleTmp.size() > 0) {
                     find[0] = true;
                 }
             }

@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import angers.m2.boundingbox.MainActivity;
+import angers.m2.boundingbox.debug.Tools;
 import angers.m2.boundingbox.form.DoorForm;
 import angers.m2.boundingbox.form.WindowForm;
 import angers.m2.boundingbox.tools.Kmeans;
@@ -33,7 +34,7 @@ import angers.m2.boundingbox.tools.Vista;
  */
 public class Algorithm {
 
-    public static Mat formRecognition(Mat original, Speaker speaker) {
+    public static Mat formRecognition(Mat original, Speaker speaker, boolean shoot) {
         /** le calcul du range ce fait avec le retour du threshold
          * cf http://www.academypublisher.com/proc/isip09/papers/isip09p109.pdf
          * la valeur min est de maniere empirique la moitier.
@@ -45,12 +46,24 @@ public class Algorithm {
 
         // vire les details insignifiant
         Imgproc.erode(threshold, threshold, new Mat(), new Point(), 4);
+        if (shoot)
+            Tools.writeBitMap(threshold, "1 - erode");
+
         Imgproc.dilate(threshold, threshold, new Mat(), new Point(), 1);
+
+        if (shoot)
+            Tools.writeBitMap(threshold, "2 - dilate");
 
         double hightThreshold = Imgproc.threshold(threshold, new Mat(), 0, 255, Imgproc.THRESH_OTSU);
         Imgproc.Canny(src, tmp, hightThreshold / 2, hightThreshold);
 
+        if (shoot)
+            Tools.writeBitMap(tmp, "3 - canny");
+
         Imgproc.dilate(tmp, tmp, new Mat(), new Point(), 2);
+
+        if (shoot)
+            Tools.writeBitMap(tmp, "4 - dilate");
 
         List<MatOfPoint> contours = new ArrayList<>();
         Imgproc.findContours(tmp, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -74,15 +87,17 @@ public class Algorithm {
             rotRect.points(vertices);
 
             // controle sur la taille des objets pour éviter le bruit mis en boite
-            if (isNotTooBig(rotRect, original)) {
+            if (isNotTooBig(rotRect, original) && isNotTooSmall(rotRect, original)) {
 
                 Scalar color = null;
                 if (DoorForm.getInstance().isRecognized(rotRect, tmp)) {
                     MainActivity.obstacle.add(speaker.getLocation(Speaker.DOOR, 1, rotRect.center, tmp));
                     color = new Scalar(0, 0, 255);
-                } else if (WindowForm.getInstance().isRecognized(rotRect, original)) {
+                } else if (WindowForm.getInstance().isRecognized(rotRect, src)) {
                     color = new Scalar(0, 0, 255);
                     MainActivity.obstacle.add(speaker.getLocation(Speaker.WINDOW, 1, rotRect.center, tmp));
+                } else {
+                    Log.d("constraint", "NOT RECOGNIZED");
                 }
 
 
@@ -146,7 +161,7 @@ public class Algorithm {
      * @return true if object isn't too big
      */
     public static boolean isNotTooBig(@NonNull RotatedRect rotatedRect, @NonNull Mat mat) {
-        return rotatedRect.size.height * rotatedRect.size.width < mat.height() * mat.width() * 0.6 && rotatedRect.size.width < mat.width() * 0.90 && rotatedRect.size.height < mat.height() * 0.90;
+        return rotatedRect.size.height * rotatedRect.size.width < mat.height() * mat.width() * 0.7 && rotatedRect.size.width < mat.width() * 0.90 && rotatedRect.size.height < mat.height() * 0.90;
     }
 
     /**

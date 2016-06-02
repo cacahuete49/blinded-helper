@@ -121,7 +121,7 @@ public class Vista {
      * @param percent Pourcentage de la marge d'erreur
      */
     public void cameraViewStarted(int width, int height, int percent) {
-        margePixel = (width * percent / 100);
+        margePixel = (width * percent) / 100;
         pixelByDegree = (int) (width / angleVision);
         size = new Size(width, height);
         vista = new Rect(0, 0, 0, height);
@@ -139,7 +139,6 @@ public class Vista {
 
             // Modification du rectangle correspondant à la ligne d'horizon + la marge d'erreur
             vista.x = valeur - (margePixel / 2);
-            vista.width = margePixel;
         } else {
             Log.e(TAG, "Erreur, l'initialisation n'a pas été effectuée !");
         }

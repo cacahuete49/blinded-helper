@@ -12,6 +12,7 @@ import org.opencv.core.RotatedRect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import angers.m2.boundingbox.debug.Tools;
 import angers.m2.boundingbox.form.constraint.IConstraint;
 import angers.m2.boundingbox.tools.Kmeans;
 import angers.m2.boundingbox.tools.Vista;
@@ -30,7 +31,7 @@ public class WindowForm extends AbstractForm {
     }
 
     public WindowForm() {
-        this.seuil = 1.0f;
+        this.seuil = 0.6f;
 
         constraints.add(new IConstraint() {
             @Override
@@ -39,8 +40,9 @@ public class WindowForm extends AbstractForm {
 
                 Mat tmp = src.clone();
                 Imgproc.cvtColor(tmp, tmp, Imgproc.COLOR_RGB2GRAY);
+                Tools.writeBitMap(src, "0_windows");
                 Imgproc.threshold(tmp, tmp, 192, 255, Imgproc.THRESH_BINARY);
-
+                Tools.writeBitMap(tmp, "1_threshold");
                 // Imgproc.adaptiveThreshold(tmp,mRgba,255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY_INV, 19, 2);
 
                 if (rectTmp.tl().y > 0 && rectTmp.tl().x > 0 && rectTmp.br().x < src.width() && rectTmp.br().y < src.height()) {

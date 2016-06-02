@@ -25,7 +25,7 @@ public class AbstractForm implements IForm {
         for (IConstraint constraint : this.constraints)
             if (constraint.assertConstraint(rect, src))
                 resultat++;
-        Log.d("abstractForm","valid="+(resultat / (float) constraints.size())+"%");
+        Log.d("abstractForm",this.getClass().getSimpleName()+" valid="+(resultat / (float) constraints.size())+"%");
         return (resultat / (float) constraints.size()) >= seuil;
     }
 }

@@ -1,5 +1,6 @@
 package angers.m2.boundingbox.tools;
 
+import org.opencv.BuildConfig;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -11,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import angers.m2.boundingbox.debug.Tools;
 
 /**
  * Created by cacahuete on 24/05/16.
@@ -25,10 +28,10 @@ public class Kmeans {
         // Resize
         Mat matResize = new Mat();
         Imgproc.resize(mat, matResize, size);
-
+        Tools.writeBitMap(matResize, "0_cluster");
         // Kmeans
         // Traitement
-        Imgproc.cvtColor(matResize, matResize, Imgproc.COLOR_RGB2HSV, 3);
+        Imgproc.cvtColor(matResize, matResize, Imgproc.COLOR_RGBA2RGB, 3);
         Imgproc.dilate(matResize, matResize, new Mat());
 
         // Calcul du kmeans
@@ -37,6 +40,7 @@ public class Kmeans {
         float maxPercent = 0;
         for (int i = 0; i < k; i++) {
             Mat frame = new Mat();
+            Tools.writeBitMap(clusters.get(i), (i + 1) + "_cluster");
             Imgproc.cvtColor(clusters.get(i), frame, Imgproc.COLOR_RGB2GRAY);
 
             float countZeroFrame = Core.countNonZero(frame);
@@ -88,7 +92,7 @@ public class Kmeans {
                 int b = (int) centers.get(label, 0)[0];
                 counts.put(label, counts.get(label) + 1);
                 // BGR OR BGRA
-                if (cutout.channels()==3) {
+                if (cutout.channels() == 3) {
                     clusters.get(label).put(y, x, b, g, r);
                 } else {
                     int a = (int) centers.get(label, 3)[0];
