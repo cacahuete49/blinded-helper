@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Mat tmp = Algorithm.formRecognition(original, speaker, clic);
         clic = false;
 
-        while (ttobj.isSpeaking()) {
+        if (ttobj.isSpeaking()) {
             // decommenter pour écrire les images
             // clic=true;
         }

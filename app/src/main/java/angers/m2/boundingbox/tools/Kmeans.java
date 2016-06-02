@@ -28,7 +28,6 @@ public class Kmeans {
         // Resize
         Mat matResize = new Mat();
         Imgproc.resize(mat, matResize, size);
-        Tools.writeBitMap(matResize, "0_cluster");
         // Kmeans
         // Traitement
         Imgproc.cvtColor(matResize, matResize, Imgproc.COLOR_RGBA2RGB, 3);
@@ -40,7 +39,6 @@ public class Kmeans {
         float maxPercent = 0;
         for (int i = 0; i < k; i++) {
             Mat frame = new Mat();
-            Tools.writeBitMap(clusters.get(i), (i + 1) + "_cluster");
             Imgproc.cvtColor(clusters.get(i), frame, Imgproc.COLOR_RGB2GRAY);
 
             float countZeroFrame = Core.countNonZero(frame);

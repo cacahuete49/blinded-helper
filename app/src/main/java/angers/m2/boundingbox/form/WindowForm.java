@@ -40,10 +40,9 @@ public class WindowForm extends AbstractForm {
 
                 Mat tmp = src.clone();
                 Imgproc.cvtColor(tmp, tmp, Imgproc.COLOR_RGB2GRAY);
-                Tools.writeBitMap(src, "0_windows");
+//                Tools.writeBitMap(src, "0_windows");
                 Imgproc.threshold(tmp, tmp, 192, 255, Imgproc.THRESH_BINARY);
-                Tools.writeBitMap(tmp, "1_threshold");
-                // Imgproc.adaptiveThreshold(tmp,mRgba,255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY_INV, 19, 2);
+//                Tools.writeBitMap(tmp, "1_threshold");
 
                 if (rectTmp.tl().y > 0 && rectTmp.tl().x > 0 && rectTmp.br().x < src.width() && rectTmp.br().y < src.height()) {
                     double totalAverage = Core.countNonZero(tmp) / (float) tmp.total();
