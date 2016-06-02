@@ -247,7 +247,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onCameraViewStarted(int width, int height) {
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         vista.cameraViewStarted(width, height, 25);
-        Log.d("SIZE3:", width + "");
     }
 
     @Override
@@ -296,25 +295,25 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public void startTimer() {
         obstacle.clear();
-        final boolean[] hasSpeak = {false};
+        final boolean[] find = {false};
         ttobj.speak("Détection en cours !", TextToSpeech.QUEUE_FLUSH, null, "none");
         new CountDownTimer(5000, 1000) {
             public void onTick(long millisUntilFinished) {
-                if (obstacle.size() > 0) {
-                    hasSpeak[0] = true;
+                ArrayList<String> obstacleTmp = new ArrayList<String>(obstacle);
+                obstacle.clear();
+                for (String o : obstacleTmp) {
+                    ttobj.speak(o, TextToSpeech.QUEUE_FLUSH, null, "findObject");
+                    while (ttobj.isSpeaking()) {}
+                }
+
+                if (obstacleTmp.size()>0){
+                    find[0] = true;
                 }
             }
 
             public void onFinish() {
-                if (!hasSpeak[0]) {
-                    ttobj.speak("Aucun objet n'a été détecté !", TextToSpeech.QUEUE_FLUSH, null, "none");
-                } else {
-                    ArrayList<String> obstacleTmp = new ArrayList<String>(obstacle);
-                        for (String o : obstacleTmp) {
-                            ttobj.speak(o, TextToSpeech.QUEUE_FLUSH, null, "findObject");
-                            while (ttobj.isSpeaking()) {
-                            }
-                    }
+                if (!find[0]) {
+                    ttobj.speak("Aucun objet n'a été détecté !", TextToSpeech.QUEUE_FLUSH, null, "findObject");
                 }
             }
         }.start();
