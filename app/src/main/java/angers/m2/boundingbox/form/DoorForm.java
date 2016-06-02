@@ -28,7 +28,7 @@ public class DoorForm extends AbstractForm implements IForm {
     }
 
     private DoorForm() {
-        seuil = 0.7f;
+        seuil = 1.0f;
 
         /**
          * Contrainte de proportion

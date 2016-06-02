@@ -124,7 +124,7 @@ public class Vista {
         margePixel = (width * percent) / 100;
         pixelByDegree = (int) (width / angleVision);
         size = new Size(width, height);
-        vista = new Rect(0, 0, 0, height);
+        vista = new Rect(0, 0, margePixel, height);
     }
 
     /**
