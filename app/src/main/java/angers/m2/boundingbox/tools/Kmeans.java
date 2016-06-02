@@ -21,7 +21,7 @@ import angers.m2.boundingbox.debug.Tools;
 public class Kmeans {
 
     public static float getPercentMaxColor(Mat mat) {
-        return getPercentMaxColor(mat, mat.size(), 3);
+        return getPercentMaxColor(mat, mat.size(), 2);
     }
 
     public static float getPercentMaxColor(Mat mat, Size size, int k) {

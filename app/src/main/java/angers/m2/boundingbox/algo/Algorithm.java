@@ -73,7 +73,7 @@ public class Algorithm {
         Collections.sort(contours, new MatComparator());
 
         int maxElement = 8;
-        deleteInsideForm(contours, maxElement);
+        //deleteInsideForm(contours, maxElement);
 
         for (int i = 0; i < maxElement && i < contours.size(); i++) {
             MatOfPoint e = contours.get(i);
@@ -91,11 +91,11 @@ public class Algorithm {
 
                 Scalar color = null;
                 if (DoorForm.getInstance().isRecognized(rotRect, tmp)) {
-                    MainActivity.obstacle.add(speaker.getLocation(Speaker.DOOR, 1, rotRect.center, tmp));
+                    MainActivity.obstacle.add(speaker.getLocation(Speaker.DOOR, 1, rotRect.center, src.size()));
                     color = new Scalar(0, 0, 255);
                 } else if (WindowForm.getInstance().isRecognized(rotRect, src)) {
                     color = new Scalar(0, 0, 255);
-                    MainActivity.obstacle.add(speaker.getLocation(Speaker.WINDOW, 1, rotRect.center, tmp));
+                    MainActivity.obstacle.add(speaker.getLocation(Speaker.WINDOW, 1, rotRect.center, src.size()));
                 } else {
                     Log.d("constraint", "NOT RECOGNIZED");
                 }

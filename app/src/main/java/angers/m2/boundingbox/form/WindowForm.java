@@ -31,7 +31,7 @@ public class WindowForm extends AbstractForm {
     }
 
     public WindowForm() {
-        this.seuil = 0.6f;
+        this.seuil = 1f;
 
         constraints.add(new IConstraint() {
             @Override

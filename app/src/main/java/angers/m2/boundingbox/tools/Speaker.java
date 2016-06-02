@@ -1,6 +1,7 @@
 package angers.m2.boundingbox.tools;
 
 import android.app.Activity;
+import android.util.Size;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -111,23 +112,23 @@ public class Speaker {
     /**
      * Split la mat en 9 pour localiser un point
       * @param p
-     * @param src
+     * @param size
      * @return
      */
-    public String getLocation(int object, int number, Point p , Mat src) {
+    public String getLocation(int object, int number, Point p , org.opencv.core.Size size) {
         int [] direction = new int[2];
 
-        if (p.x / (float) src.width() < 0.33f) {
+        if (p.x / (float) size.width < 0.33f) {
             direction[0] = Speaker.TOP;
-        } else if (p.x / (float) src.width() > 0.66f) {
+        } else if (p.x / (float) size.width > 0.66f) {
             direction[0] = Speaker.BOTTOM;
         } else {
             direction[0] = Speaker.CENTER;
         }
 
-        if (p.y / (float) src.height() < 0.33f)
+        if (p.y / (float) size.width < 0.33f)
             direction[1] = Speaker.RIGHT;
-        else if (p.y / (float) src.height() > 0.66f)
+        else if (p.y / (float) size.width > 0.66f)
             direction[1] = Speaker.LEFT;
         else
             direction[1] = Speaker.FRONT;

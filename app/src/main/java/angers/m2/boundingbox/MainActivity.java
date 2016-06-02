@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             fps++;
         }
         mRgba = inputFrame.rgba();
-        vista.cameraFrame(86f);
+        vista.cameraFrame(90f);
         load_AND_display(mRgba);
 
         return mRgba;
