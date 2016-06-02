@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         obstacle.clear();
         final boolean[] find = {false};
         ttobj.speak("Détection en cours !", TextToSpeech.QUEUE_FLUSH, null, "none");
-        new CountDownTimer(5000, 1000) {
+        new CountDownTimer(8000, 1000) {
             public void onTick(long millisUntilFinished) {
                 ArrayList<String> obstacleTmp = new ArrayList<String>(obstacle);
                 obstacle.clear();
@@ -306,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     while (ttobj.isSpeaking()) {}
                 }
 
-                if (obstacleTmp.size()>0){
+                if (obstacleTmp.size()>0) {
                     find[0] = true;
                 }
             }
