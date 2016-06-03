@@ -24,12 +24,19 @@ public class Kmeans {
         return getPercentMaxColor(mat, mat.size(), 2);
     }
 
+    /**
+     * Retourne le pourcentage le plus élevé de couleur dans mat pour k couleur
+     * @param mat
+     * @param size
+     * @param k
+     * @return
+     */
     public static float getPercentMaxColor(Mat mat, Size size, int k) {
         // Resize
         Mat matResize = new Mat();
         Imgproc.resize(mat, matResize, size);
+
         // Kmeans
-        // Traitement
         Imgproc.cvtColor(matResize, matResize, Imgproc.COLOR_RGBA2RGB, 3);
         Imgproc.dilate(matResize, matResize, new Mat());
 
@@ -56,6 +63,7 @@ public class Kmeans {
     }
 
     /**
+     * Calcul du Kmean avec init des variables
      * https://github.com/badlogic/opencv-fun/blob/master/src/pool/tests/Cluster.java
      */
     public static List<Mat> cluster(Mat cutout, int k) {
@@ -71,6 +79,7 @@ public class Kmeans {
     }
 
     /**
+     * Découpage du Kmeans en kmat binaire
      * https://github.com/badlogic/opencv-fun/blob/master/src/pool/tests/Cluster.java
      */
     private static List<Mat> showClusters(Mat cutout, Mat labels, Mat centers) {

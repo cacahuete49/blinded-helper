@@ -10,6 +10,12 @@ import java.util.Comparator;
  * Created by cacahuete on 30/05/16.
  */
 public class MatComparator implements Comparator<Mat> {
+    /**
+     * Ordonne les matrices par leurs aires dans l'ordre décroissant
+     * @param lhs
+     * @param rhs
+     * @return
+     */
     @Override
     public int compare(Mat lhs, Mat rhs) {
         double area1 = Imgproc.contourArea(lhs);

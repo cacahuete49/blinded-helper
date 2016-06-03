@@ -1,6 +1,5 @@
 package angers.m2.boundingbox.algo;
 
-import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -21,7 +20,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import angers.m2.boundingbox.MainActivity;
-import angers.m2.boundingbox.debug.Tools;
 import angers.m2.boundingbox.form.BlockForm;
 import angers.m2.boundingbox.form.DoorForm;
 import angers.m2.boundingbox.form.WindowForm;
@@ -35,6 +33,14 @@ import angers.m2.boundingbox.tools.Vista;
  */
 public class Algorithm {
 
+    /**
+     * Pré-traitement, traitement et reconnaissance
+     *
+     * @param original
+     * @param speaker
+     * @param shoot
+     * @return
+     */
     public static Mat formRecognition(Mat original, Speaker speaker, boolean shoot) {
         /** le calcul du range ce fait avec le retour du threshold
          * cf http://www.academypublisher.com/proc/isip09/papers/isip09p109.pdf
@@ -52,7 +58,7 @@ public class Algorithm {
         double hightThreshold = Imgproc.threshold(threshold, new Mat(), 0, 255, Imgproc.THRESH_OTSU);
         Imgproc.Canny(src, tmp, hightThreshold / 2, hightThreshold);
 
-        Imgproc.dilate(tmp, tmp, new Mat(), new Point(),2);
+        Imgproc.dilate(tmp, tmp, new Mat(), new Point(), 2);
         Imgproc.erode(tmp, tmp, new Mat(), new Point(), 1);
 
         List<MatOfPoint> contours = new ArrayList<>();
@@ -64,8 +70,8 @@ public class Algorithm {
 
         int maxElement = 8;
         //deleteInsideForm(contours, maxElement);
-        int fenetre=0;
-        int porte=0;
+        int fenetre = 0;
+        int porte = 0;
 
         for (int i = 0; i < maxElement && i < contours.size(); i++) {
             MatOfPoint e = contours.get(i);
@@ -90,7 +96,7 @@ public class Algorithm {
                     fenetre++;
                     MainActivity.obstacle.add(speaker.getLocation(Speaker.WINDOW, fenetre, rotRect.center, tmp.size()));
                     color = new Scalar(0, 0, 255);
-                } else if (BlockForm.getInstance().isRecognized(rotRect, src)){
+                } else if (BlockForm.getInstance().isRecognized(rotRect, src)) {
                     color = new Scalar(0, 0, 255);
                     MainActivity.obstacle.add(speaker.getLocation(Speaker.WINDOW, 1, rotRect.center, src.size()));
                 } else {
@@ -108,6 +114,12 @@ public class Algorithm {
         return tmp;
     }
 
+    /**
+     * Identification des obstacles sur la partie inférieur de l'image
+     *
+     * @param src
+     * @return
+     */
     public static Mat stuffFinder(Mat src) {
 
         Mat tmp = new Mat();

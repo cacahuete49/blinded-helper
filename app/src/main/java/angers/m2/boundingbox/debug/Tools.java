@@ -13,6 +13,11 @@ import java.io.IOException;
 
 public class Tools {
 
+    /**
+     * Permet d'identifier
+     * @param mat
+     * @param fileName
+     */
     public static void writeBitMap(Mat mat, String fileName) {
         Log.d("file", "write file " + fileName);
         File bmpFile = new File(Environment.getExternalStorageDirectory() + File.separator + "OpenCV" + File.separator + fileName + ".png");

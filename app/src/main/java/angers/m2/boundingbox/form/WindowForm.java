@@ -33,6 +33,9 @@ public class WindowForm extends AbstractForm {
     public WindowForm() {
         this.seuil = 1.0f;
 
+        /**
+         * Contrainte de luminosité
+         */
         constraints.add(new IConstraint() {
             @Override
             public boolean assertConstraint(RotatedRect rect, Mat src) {
@@ -55,6 +58,9 @@ public class WindowForm extends AbstractForm {
             }
         });
 
+        /**
+         * Contrainte de position
+         */
         constraints.add(new IConstraint() {
             @Override
             public boolean assertConstraint(RotatedRect rect, Mat src) {
@@ -66,6 +72,9 @@ public class WindowForm extends AbstractForm {
             }
         });
 
+        /**
+         * Contrainte de couleur faible
+         */
         constraints.add(new IConstraint() {
             @Override
             public boolean assertConstraint(RotatedRect rect, Mat src) {

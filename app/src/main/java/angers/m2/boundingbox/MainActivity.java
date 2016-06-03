@@ -54,7 +54,9 @@ import angers.m2.boundingbox.tools.Vista;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, SensorEventListener, View.OnTouchListener {
 
-    // TODO a jeter après les test
+    /**
+     * DEBUGAGE: Affiche la matrice dans une seconde partie de la vue
+     */
     class OneShotTask implements Runnable {
         Bitmap bmp;
         ImageView image;
@@ -133,11 +135,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
         SizeF sizeF = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
 
-        Log.d("photo", "" + sizeF.toString());
         float[] f = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
-        Log.d("photo", "" + f.length);
         double result = Math.toDegrees(2 * Math.atan(sizeF.getWidth() / (2 * f[0])));
-        Log.d("photo", "" + result);
 
         //first Size under 500px height
         boolean shunt = false;
@@ -151,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (shunt) break;
         }
 
+//        Calcul de la meilleur résolution pour faire du HighFPS
 //        if (configs.getHighSpeedVideoSizes().length > 0) {
 //            android.util.Size size = configs.getHighSpeedVideoSizes()[configs.getHighSpeedVideoSizes().length - 1];
 //            cam0.setMaxFrameSize(size.getWidth(), size.getHeight());
@@ -166,24 +166,26 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     }
 
+    /**
+     * Traitement principal
+     *
+     * @param src
+     */
     public void load_AND_display(Mat src) {
         try {
-//            findObstacle(src);
-            mRgba = findForm(src);
+            mRgba = Algorithm.formRecognition(src, speaker, clic);
         } catch (Throwable e) {
+            /**
+             * Nécessaire pour catcher les différentes erreurs de la librairie
+             */
             Log.getStackTraceString(e);
         }
-    }
-
-    @NonNull
-    private Mat findForm(Mat original) {
-        Mat tmp = Algorithm.formRecognition(original, speaker, clic);
-        return tmp;
     }
 
 
     /**
      * Calcul le Kmeans de la zone sous l'horizon pour mettre en avant les obstacles.
+     * TODO: à terminer :'(
      *
      * @param src entre de la camera
      */
@@ -217,16 +219,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // output
         this.runOnUiThread(new OneShotTask((ImageView) findViewById(R.id.imageView), tmpMat));
 
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -268,6 +260,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        fpsMeter();
+
+        // repositionnement de l'horizon
+        vista.cameraFrame(90f);
+
+        // extraction de la Mat
+        mRgba = inputFrame.rgba();
+
+        // traitement
+        load_AND_display(mRgba);
+
+        return mRgba;
+    }
+
+    private void fpsMeter() {
         if (SystemClock.currentThreadTimeMillis() - timer > 1000) {
             Log.i("FPS", "FPS:" + fps);
             fps = 0;
@@ -275,11 +282,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         } else {
             fps++;
         }
-        mRgba = inputFrame.rgba();
-        vista.cameraFrame(90f);
-        load_AND_display(mRgba);
-
-        return mRgba;
     }
 
     @Override
@@ -297,26 +299,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return false;
     }
 
+    /**
+     * Speacker onclic méthode
+     */
     public void startTimer() {
         obstacle.clear();
         final boolean[] find = {false};
         ttobj.speak("Détection en cours !", TextToSpeech.QUEUE_FLUSH, null, "none");
         new CountDownTimer(3000, 1000) {
             public void onTick(long millisUntilFinished) {
-                ArrayList<String> obstacleTmp = new ArrayList<>(obstacle);
-                Log.d("obstacle","obstacle size"+obstacle.size());
-                if (obstacleTmp.isEmpty()) return;
-
-                if (!find[0]) {
-//                    for (String o : obstacleTmp) {
-                    ttobj.speak(obstacleTmp.get(obstacleTmp.size()-1), TextToSpeech.QUEUE_ADD, null, "findObject");
+                Log.d("obstacle", "obstacle size" + obstacle.size());
+                if (!obstacle.isEmpty()) {
+                    ttobj.speak(obstacle.get(obstacle.size() - 1), TextToSpeech.QUEUE_ADD, null, "findObject");
                     obstacle.clear();
-//                        break;
+                    find[0] = true;
                 }
-//
-//                if (obstacleTmp.size() > 0) {
-                find[0] = true;
-//                }
             }
 
             public void onFinish() {

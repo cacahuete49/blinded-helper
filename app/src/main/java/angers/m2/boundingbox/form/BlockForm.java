@@ -23,7 +23,7 @@ public class BlockForm extends AbstractForm implements IForm {
         seuil = 1.0f;
 
         /**
-         * Contrainte de proportion
+         * Contrainte de position
          */
         constraints.add(new IConstraint() {
             @Override
