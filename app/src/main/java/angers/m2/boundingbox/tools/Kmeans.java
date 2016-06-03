@@ -39,10 +39,15 @@ public class Kmeans {
         float maxPercent = 0;
         for (int i = 0; i < k; i++) {
             Mat frame = new Mat();
-            Imgproc.cvtColor(clusters.get(i), frame, Imgproc.COLOR_RGB2GRAY);
+
+            if (clusters.get(i).channels() == 4) {
+                Imgproc.cvtColor(clusters.get(i), frame, Imgproc.COLOR_RGBA2GRAY);
+            } else {
+                Imgproc.cvtColor(clusters.get(i), frame, Imgproc.COLOR_RGB2GRAY);
+            }
 
             float countZeroFrame = Core.countNonZero(frame);
-            float calculPercent = countZeroFrame / frame.total() * 100;
+            float calculPercent = (countZeroFrame /(float) frame.total());
             if (calculPercent > maxPercent) {
                 maxPercent = calculPercent;
             }
@@ -72,7 +77,7 @@ public class Kmeans {
         centers.convertTo(centers, CvType.CV_8UC1, 255.0);
         centers.reshape(3);
 
-        List<Mat> clusters = new ArrayList<Mat>();
+        List<Mat> clusters = new ArrayList<>();
         for (int i = 0; i < centers.rows(); i++) {
             clusters.add(Mat.zeros(cutout.size(), cutout.type()));
         }

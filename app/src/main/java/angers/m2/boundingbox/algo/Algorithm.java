@@ -22,6 +22,7 @@ import java.util.List;
 
 import angers.m2.boundingbox.MainActivity;
 import angers.m2.boundingbox.debug.Tools;
+import angers.m2.boundingbox.form.BlockForm;
 import angers.m2.boundingbox.form.DoorForm;
 import angers.m2.boundingbox.form.WindowForm;
 import angers.m2.boundingbox.tools.Kmeans;
@@ -46,34 +47,25 @@ public class Algorithm {
 
         // vire les details insignifiant
         Imgproc.erode(threshold, threshold, new Mat(), new Point(), 4);
-        if (shoot)
-            Tools.writeBitMap(threshold, "1 - erode");
-
         Imgproc.dilate(threshold, threshold, new Mat(), new Point(), 1);
-
-        if (shoot)
-            Tools.writeBitMap(threshold, "2 - dilate");
 
         double hightThreshold = Imgproc.threshold(threshold, new Mat(), 0, 255, Imgproc.THRESH_OTSU);
         Imgproc.Canny(src, tmp, hightThreshold / 2, hightThreshold);
 
-        if (shoot)
-            Tools.writeBitMap(tmp, "3 - canny");
-
-        Imgproc.dilate(tmp, tmp, new Mat(), new Point(), 2);
-
-        if (shoot)
-            Tools.writeBitMap(tmp, "4 - dilate");
+        Imgproc.dilate(tmp, tmp, new Mat(), new Point(),2);
+        Imgproc.erode(tmp, tmp, new Mat(), new Point(), 1);
 
         List<MatOfPoint> contours = new ArrayList<>();
         Imgproc.findContours(tmp, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        Imgproc.cvtColor(tmp, tmp, Imgproc.COLOR_GRAY2RGB);
-
         Collections.sort(contours, new MatComparator());
+
+        Imgproc.cvtColor(tmp, tmp, Imgproc.COLOR_GRAY2RGB);
 
         int maxElement = 8;
         //deleteInsideForm(contours, maxElement);
+        int fenetre=0;
+        int porte=0;
 
         for (int i = 0; i < maxElement && i < contours.size(); i++) {
             MatOfPoint e = contours.get(i);
@@ -90,23 +82,24 @@ public class Algorithm {
             if (isNotTooBig(rotRect, original) && isNotTooSmall(rotRect, original)) {
 
                 Scalar color = null;
-                if (DoorForm.getInstance().isRecognized(rotRect, tmp)) {
-                    MainActivity.obstacle.add(speaker.getLocation(Speaker.DOOR, 1, rotRect.center, src.size()));
+                if (DoorForm.getInstance().isRecognized(rotRect, src)) {
+                    porte++;
+                    MainActivity.obstacle.add(speaker.getLocation(Speaker.DOOR, porte, rotRect.center, tmp.size()));
                     color = new Scalar(0, 0, 255);
                 } else if (WindowForm.getInstance().isRecognized(rotRect, src)) {
+                    fenetre++;
+                    MainActivity.obstacle.add(speaker.getLocation(Speaker.WINDOW, fenetre, rotRect.center, tmp.size()));
+                    color = new Scalar(0, 0, 255);
+                } else if (BlockForm.getInstance().isRecognized(rotRect, src)){
                     color = new Scalar(0, 0, 255);
                     MainActivity.obstacle.add(speaker.getLocation(Speaker.WINDOW, 1, rotRect.center, src.size()));
                 } else {
                     Log.d("constraint", "NOT RECOGNIZED");
                 }
 
-
-                if (rect.area() * 0.85 < rotRect.size.height * rotRect.size.width) {
-                    Imgproc.rectangle(tmp, rect.br(), rect.tl(), (color == null ? new Scalar(255, 0, 0) : color), 3);
-                } else {
-                    for (int j = 0; j < 4; j++) {
-                        Imgproc.line(tmp, vertices[j], vertices[(j + 1) % 4], (color == null ? new Scalar(0, 255, 0) : color));
-                    }
+//                Imgproc.rectangle(tmp, rect.br(), rect.tl(), (color == null ? new Scalar(255, 0, 0) : color), 3);
+                for (int j = 0; j < 4; j++) {
+                    Imgproc.line(tmp, vertices[j], vertices[(j + 1) % 4], (color == null ? new Scalar(0, 255, 0) : color));
                 }
             } else {
                 Log.d("size", "Too big element");

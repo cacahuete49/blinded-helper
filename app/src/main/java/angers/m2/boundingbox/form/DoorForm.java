@@ -70,7 +70,7 @@ public class DoorForm extends AbstractForm implements IForm {
         constraints.add(new IConstraint() {
             @Override
             public boolean assertConstraint(RotatedRect rect, Mat src) {
-                boolean output = Vista.getPositionPoint(rect.center) == Vista.INSIDE && (Math.abs(rect.angle) < 15);
+                boolean output = Vista.getPositionPoint(rect.center) == Vista.INSIDE;
                 Log.d("constraint","vista("+rect.center+" :"+output);
                 return output;
             }
@@ -79,33 +79,33 @@ public class DoorForm extends AbstractForm implements IForm {
         /**
          * Contrainte de couleurs unis à 80% min
          */
-        constraints.add(new IConstraint() {
-            @Override
-            public boolean assertConstraint(RotatedRect rect, Mat src) {
-                Rect rectTmp = rect.boundingRect();
-                if (rectTmp.x < 0)
-                    rectTmp.x = 0;
-                if (rectTmp.y < 0)
-                    rectTmp.y = 0;
-                if (rectTmp.x + rectTmp.width > src.width() - 1)
-                    rectTmp.width = src.width() - 1 - rectTmp.x;
-                if (rectTmp.y + rectTmp.height > src.height() - 1)
-                    rectTmp.height = src.height() - 1 - rectTmp.y;
-
-                Mat tmp;
-                try {
-                    tmp = src.submat(rectTmp);
-                } catch (CvException e) {
-                    Log.e("constraint", " rect out of mat -> rectTmp:(" + rectTmp.tl() + "," + rectTmp.br() + ") src:" + src.size());
-                    return false;
-                }
-                float percent = Kmeans.getPercentMaxColor(tmp,tmp.size(),2);
-                boolean output =  percent > 80;
-                Log.d("constraint","kmeans "+percent+"% :"+output);
-                return output;
-
-            }
-        });
+//        constraints.add(new IConstraint() {
+//            @Override
+//            public boolean assertConstraint(RotatedRect rect, Mat src) {
+//                Rect rectTmp = rect.boundingRect();
+//                if (rectTmp.x < 0)
+//                    rectTmp.x = 0;
+//                if (rectTmp.y < 0)
+//                    rectTmp.y = 0;
+//                if (rectTmp.x + rectTmp.width > src.width() - 1)
+//                    rectTmp.width = src.width() - 1 - rectTmp.x;
+//                if (rectTmp.y + rectTmp.height > src.height() - 1)
+//                    rectTmp.height = src.height() - 1 - rectTmp.y;
+//
+//                Mat tmp;
+//                try {
+//                    tmp = src.submat(rectTmp);
+//                } catch (CvException e) {
+//                    Log.e("constraint", " rect out of mat -> rectTmp:(" + rectTmp.tl() + "," + rectTmp.br() + ") src:" + src.size());
+//                    return false;
+//                }
+//                float percent = Kmeans.getPercentMaxColor(tmp,tmp.size(),2);
+//                boolean output =  percent > 0.8f;
+//                Log.d("constraint","kmeans "+percent+"% :"+output);
+//                return output;
+//
+//            }
+//        });
 
     }
 }

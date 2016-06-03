@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public void load_AND_display(Mat src) {
         try {
-            findObstacle(src);
+//            findObstacle(src);
             mRgba = findForm(src);
         } catch (Throwable e) {
             Log.getStackTraceString(e);
@@ -177,21 +177,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     @NonNull
     private Mat findForm(Mat original) {
-        if (clic) {
-            Tools.writeBitMap(original, "0 - original");
-        }
-
         Mat tmp = Algorithm.formRecognition(original, speaker, clic);
-        clic = false;
-
-        if (ttobj.isSpeaking()) {
-            // decommenter pour écrire les images
-            // clic=true;
-        }
-        if (clic) {
-            Tools.writeBitMap(tmp, "5 - final");
-        }
-
         return tmp;
     }
 
@@ -264,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     @Override
     public void onCameraViewStarted(int width, int height) {
         mRgba = new Mat(height, width, CvType.CV_8UC4);
-        vista.cameraViewStarted(width, height, 25);
+        vista.cameraViewStarted(width, height, 20);
     }
 
     @Override
@@ -315,18 +301,22 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         obstacle.clear();
         final boolean[] find = {false};
         ttobj.speak("Détection en cours !", TextToSpeech.QUEUE_FLUSH, null, "none");
-        new CountDownTimer(8000, 1000) {
+        new CountDownTimer(3000, 1000) {
             public void onTick(long millisUntilFinished) {
                 ArrayList<String> obstacleTmp = new ArrayList<>(obstacle);
-                obstacle.clear();
-                if (!ttobj.isSpeaking())
-                    for (String o : obstacleTmp) {
-                        ttobj.speak(o, TextToSpeech.QUEUE_ADD, null, "findObject");
-                    }
+                Log.d("obstacle","obstacle size"+obstacle.size());
+                if (obstacleTmp.isEmpty()) return;
 
-                if (obstacleTmp.size() > 0) {
-                    find[0] = true;
+                if (!find[0]) {
+//                    for (String o : obstacleTmp) {
+                    ttobj.speak(obstacleTmp.get(obstacleTmp.size()-1), TextToSpeech.QUEUE_ADD, null, "findObject");
+                    obstacle.clear();
+//                        break;
                 }
+//
+//                if (obstacleTmp.size() > 0) {
+                find[0] = true;
+//                }
             }
 
             public void onFinish() {

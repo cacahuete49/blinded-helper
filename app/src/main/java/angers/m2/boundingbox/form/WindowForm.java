@@ -31,7 +31,7 @@ public class WindowForm extends AbstractForm {
     }
 
     public WindowForm() {
-        this.seuil = 1f;
+        this.seuil = 1.0f;
 
         constraints.add(new IConstraint() {
             @Override
@@ -59,10 +59,10 @@ public class WindowForm extends AbstractForm {
             @Override
             public boolean assertConstraint(RotatedRect rect, Mat src) {
                 Point tmp = rect.center.clone();
-                tmp.y = rect.center.y + (rect.size.width / 10.0f);
+                tmp.y = rect.center.y;
 
                 int pos = Vista.getPositionPoint(tmp);
-                return pos == Vista.INSIDE && (Math.abs(rect.angle) < 15);
+                return pos == Vista.EXTERN_UP && (Math.abs(rect.angle) < 15);
             }
         });
 
