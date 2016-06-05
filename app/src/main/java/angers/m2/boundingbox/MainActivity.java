@@ -36,6 +36,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
@@ -173,7 +174,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      */
     public void load_AND_display(Mat src) {
         try {
-            mRgba = Algorithm.formRecognition(src, speaker, clic);
+//            mRgba = Algorithm.formRecognition(src, speaker, clic);
+            RotatedRect horizon=Vista.getVista();
+            Point[] pts= new Point[4];
+            horizon.points(pts);
+            for (int j = 0; j < 4; j++) {
+                Imgproc.line(src, pts[j], pts[(j + 1) % 4], new Scalar(0,0,255),2);
+            }
+//            Imgproc.rectangle(mRgba,Vista.getVista().tl(),Vista.getVista().br(),new Scalar(255,0,0),3);
         } catch (Throwable e) {
             /**
              * Nécessaire pour catcher les différentes erreurs de la librairie
@@ -189,35 +197,34 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      *
      * @param src entre de la camera
      */
-    @NonNull
     private void findObstacle(Mat src) {
         /**
          * https://github.com/badlogic/opencv-fun/blob/master/src/pool/tests/Cluster.java
          */
-        Mat tmpMat = Algorithm.stuffFinder(src.clone());
-
-        List<MatOfPoint> contours = new ArrayList<>();
-
-        Imgproc.cvtColor(tmpMat, tmpMat, Imgproc.COLOR_RGB2GRAY, 1);
-//            Imgproc.threshold(tmpMat, tmpMat, 0, 255, Imgproc.THRESH_OTSU);
-        Imgproc.findContours(tmpMat, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-        Imgproc.cvtColor(tmpMat, tmpMat, Imgproc.COLOR_GRAY2RGB);
-
-        Collections.sort(contours, new MatComparator());
-
-        for (int i = 0; i < contours.size(); i++) {
-            MatOfPoint e = contours.get(i);
-            RotatedRect rotatedRect = Imgproc.minAreaRect(new MatOfPoint2f(e.toArray()));
-
-            if (Algorithm.isNotTooBig(rotatedRect, tmpMat) && Algorithm.isNotTooSmall(rotatedRect, tmpMat)) {
-                Rect rect = new Rect(0, 0, (int) rotatedRect.size.width, (int) rotatedRect.size.height);
-                Imgproc.rectangle(tmpMat, rect.br(), rect.tl(), new Scalar(255, 0, 0));
-            }
-
-        }
-
-        // output
-        this.runOnUiThread(new OneShotTask((ImageView) findViewById(R.id.imageView), tmpMat));
+//        Mat tmpMat = Algorithm.stuffFinder(src.clone());
+//
+//        List<MatOfPoint> contours = new ArrayList<>();
+//
+//        Imgproc.cvtColor(tmpMat, tmpMat, Imgproc.COLOR_RGB2GRAY, 1);
+////            Imgproc.threshold(tmpMat, tmpMat, 0, 255, Imgproc.THRESH_OTSU);
+//        Imgproc.findContours(tmpMat, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+//        Imgproc.cvtColor(tmpMat, tmpMat, Imgproc.COLOR_GRAY2RGB);
+//
+//        Collections.sort(contours, new MatComparator());
+//
+//        for (int i = 0; i < contours.size(); i++) {
+//            MatOfPoint e = contours.get(i);
+//            RotatedRect rotatedRect = Imgproc.minAreaRect(new MatOfPoint2f(e.toArray()));
+//
+//            if (Algorithm.isNotTooBig(rotatedRect, tmpMat) && Algorithm.isNotTooSmall(rotatedRect, tmpMat)) {
+//                Rect rect = new Rect(0, 0, (int) rotatedRect.size.width, (int) rotatedRect.size.height);
+//                Imgproc.rectangle(tmpMat, rect.br(), rect.tl(), new Scalar(255, 0, 0));
+//            }
+//
+//        }
+//
+//        // output
+//        this.runOnUiThread(new OneShotTask((ImageView) findViewById(R.id.imageView), tmpMat));
 
     }
 
@@ -263,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         fpsMeter();
 
         // repositionnement de l'horizon
-        vista.cameraFrame(90f);
+        vista.cameraFrame(90f,mRgba.size());
 
         // extraction de la Mat
         mRgba = inputFrame.rgba();

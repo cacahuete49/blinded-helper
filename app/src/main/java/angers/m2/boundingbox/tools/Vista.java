@@ -2,6 +2,7 @@ package angers.m2.boundingbox.tools;
 
 import android.app.Activity;
 import android.content.Context;
+import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -9,6 +10,7 @@ import android.hardware.SensorManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
+import android.support.v4.content.res.TypedArrayUtils;
 import android.util.Log;
 import android.view.Surface;
 import android.view.WindowManager;
@@ -17,6 +19,7 @@ import org.opencv.core.CvException;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -36,16 +39,16 @@ public class Vista {
     private float[] magnetometreValues = new float[3];
     private float[] resultMatrix = new float[9];
     private float[] resultMatrix2 = new float[9];
-    private float[] gyroscopeValues = new float[3];
+    private Float[] gyroscopeValues = new Float[3];
 
     private double angleVision;
-    private List pileGyroscope;
+    private List<Float[]> pileGyroscope;
 
     private int margePixel;
     private int pixelByDegree;
     private Size size;
 
-    private static Rect vista;
+    private static RotatedRect vista;
 
     public static final int INSIDE = 0;
     public static final int EXTERN_UP = 1;
@@ -78,7 +81,8 @@ public class Vista {
                 CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
                 CameraCharacteristics characteristics = manager.getCameraCharacteristics(manager.getCameraIdList()[0]);
 
-                angleVision = Math.toDegrees(2 * Math.atan(characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE).getWidth() / (2 * characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0])));
+                float diagonal = (float)Math.sqrt(Math.pow(characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE).getWidth(),2)+Math.pow(characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE).getHeight(),2));
+                angleVision = Math.toDegrees(2 * Math.atan(diagonal / (2 * characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0])));
                 pileGyroscope = Collections.synchronizedList(new ArrayList());
             } else {
                 Log.e(TAG, "Erreur, l'activité ne peut pas être nulle !");
@@ -95,7 +99,9 @@ public class Vista {
     public void start() {
         if (activity != null) {
             sensorManager.registerListener((SensorEventListener) activity, sensorAccelerometre, SensorManager.SENSOR_DELAY_FASTEST);
+            sensorManager.registerListener((SensorEventListener) activity, sensorAccelerometre, SensorManager.SENSOR_STATUS_ACCURACY_HIGH);
             sensorManager.registerListener((SensorEventListener) activity, sensorMagnetometre, SensorManager.SENSOR_DELAY_FASTEST);
+            sensorManager.registerListener((SensorEventListener) activity, sensorMagnetometre, SensorManager.SENSOR_STATUS_ACCURACY_HIGH);
         } else {
             Log.e(TAG, "Erreur, l'initialisation n'a pas été effectuée !");
         }
@@ -122,9 +128,9 @@ public class Vista {
      */
     public void cameraViewStarted(int width, int height, int percent) {
         margePixel = (width * percent) / 100;
-        pixelByDegree = (int) (width / angleVision);
+        pixelByDegree = (int) ( (width-margePixel) / angleVision);
         size = new Size(width, height);
-        vista = new Rect(0, 0, margePixel, height);
+        vista = new RotatedRect(new Point(width / 2, height / 2), new Size(margePixel, height), 0f);
     }
 
     /**
@@ -132,13 +138,16 @@ public class Vista {
      *
      * @param angleCalibrage Angle du t&eacute;l&eacute;phone pour le calibrage de la librarie.
      */
-    public void cameraFrame(float angleCalibrage) {
+    public void cameraFrame(float angleCalibrage, Size size) {
         if (activity != null) {
             // Calcul de la valeur de l'horizon
-            int valeur = (int) ((getAverageGyroscope() + angleCalibrage) * pixelByDegree + (size.width / 2));
+            Float[] angles = getAverageGyroscope();
+            int valeur = (int) ((angles[2] + angleCalibrage) * pixelByDegree + (size.width / 2));
 
             // Modification du rectangle correspondant à la ligne d'horizon + la marge d'erreur
-            vista.x = valeur - (margePixel / 2);
+            vista.center.x = valeur;
+            vista.angle = -angles[1];
+            vista.size.height = size.height / Math.cos(Math.toRadians(vista.angle));
         } else {
             Log.e(TAG, "Erreur, l'initialisation n'a pas été effectuée !");
         }
@@ -173,10 +182,14 @@ public class Vista {
                         SensorManager.remapCoordinateSystem(resultMatrix, SensorManager.AXIS_Y, SensorManager.AXIS_MINUS_X, resultMatrix2);
                         break;
                 }
-                SensorManager.getOrientation(resultMatrix2, gyroscopeValues);
+                float[] tmp = new float[3];
+                SensorManager.getOrientation(resultMatrix2, tmp);
+                gyroscopeValues[0] = tmp[0];
+                gyroscopeValues[1] = tmp[1];
+                gyroscopeValues[2] = tmp[2];
             }
 
-            pileGyroscope.add((float) Math.toDegrees(gyroscopeValues[2]));
+            pileGyroscope.add(gyroscopeValues);
         } else {
             Log.e(TAG, "Erreur, l'initialisation n'a pas été effectuée !");
         }
@@ -187,7 +200,7 @@ public class Vista {
      *
      * @return Le rectangle correspondant à l'horizon plus la marge d'erreur.
      */
-    public static Rect getVista() {
+    public static RotatedRect getVista() {
         return vista;
     }
 
@@ -198,7 +211,7 @@ public class Vista {
      * @return 0 (contenu), 1 (au dessus) ou -1 (en dessous)
      */
     public static int getPositionPoint(Point point) {
-        ArrayList<Point> listPosition = new ArrayList<>();
+        ArrayList<Point> listPosition = new ArrayList<>(1);
         listPosition.add(point);
 
         return getPositionPoint(listPosition).get(0);
@@ -213,10 +226,10 @@ public class Vista {
     public static ArrayList<Integer> getPositionPoint(ArrayList<Point> listPoint) {
         ArrayList<Integer> listPosition = new ArrayList<>();
         for (Point P : listPoint) {
-            if (vista.contains(P)) {
+            if (vista.boundingRect().contains(P)) {
                 listPosition.add(INSIDE);
             } else {
-                listPosition.add(P.y > vista.y ? EXTERN_UP : EXTERN_DOWN);
+                listPosition.add(P.y > vista.center.y - vista.size.width / 2 ? EXTERN_UP : EXTERN_DOWN);
             }
         }
 
@@ -231,21 +244,21 @@ public class Vista {
      * @return Une sous matrice de la matrice mat en fonction de la position.
      */
     public static Mat getSubMat(Mat mat, int position) {
-        try {
-            if (position == INSIDE && vista.x > 0 && vista.x < mat.height()) {
-                return mat.submat(vista);
-            }
-            if (position == EXTERN_UP && vista.x > 0 && vista.x < mat.height()) {
-                return mat.submat(0, mat.height() - 1, 0, vista.x);
-            }
-            if (position == EXTERN_DOWN && vista.x > 0 && vista.x + vista.width < mat.height()) {
-                return mat.submat(0, mat.height() - 1, vista.x + vista.width, mat.width() - 1);
-            }
-        } catch (CvException e) {
-            Log.e("CvException", "bad submat");
-            Log.getStackTraceString(e);
-        }
-        Log.e(TAG, "Erreur la matrice n'a pas les bonnes dimensions !");
+//        try {
+//            if (position == INSIDE && vista.x > 0 && vista.x < mat.height()) {
+//                return mat.submat(vista);
+//            }
+//            if (position == EXTERN_UP && vista.x > 0 && vista.x < mat.height()) {
+//                return mat.submat(0, mat.height() - 1, 0, vista.x);
+//            }
+//            if (position == EXTERN_DOWN && vista.x > 0 && vista.x + vista.width < mat.height()) {
+//                return mat.submat(0, mat.height() - 1, vista.x + vista.width, mat.width() - 1);
+//            }
+//        } catch (CvException e) {
+//            Log.e("CvException", "bad submat");
+//            Log.getStackTraceString(e);
+//        }
+//        Log.e(TAG, "Erreur la matrice n'a pas les bonnes dimensions !");
         return mat;
     }
 
@@ -258,7 +271,7 @@ public class Vista {
      */
     public static Mat getSubMat(Mat mat, Point p) {
         try {
-            if (p.inside(new Rect(new Point(),mat.size()))) {
+            if (p.inside(new Rect(new Point(), mat.size()))) {
                 return mat.submat(0, mat.height() - 1, (int) p.x, mat.width() - 1);
             }
         } catch (CvException e) {
@@ -273,14 +286,21 @@ public class Vista {
      *
      * @return La moyenne du gyroscope.
      */
-    private float getAverageGyroscope() {
-        ArrayList<Float> pileGyroscopeCopy = new ArrayList<>(pileGyroscope);
+    private Float[] getAverageGyroscope() {
+        ArrayList<Float[]> pileGyroscopeCopy = new ArrayList<>(pileGyroscope);
         pileGyroscope.clear();
 
-        float currentAngle = 0;
-        for (float f : pileGyroscopeCopy) {
-            currentAngle += f;
+        Float[] currentAngle = {0f, 0f, 0f};
+        for (Float[] fs : pileGyroscopeCopy) {
+            currentAngle[0] += fs[0];
+            currentAngle[1] += fs[1];
+            currentAngle[2] += fs[2];
         }
-        return currentAngle / pileGyroscopeCopy.size();
+
+        currentAngle[0] = (float) Math.toDegrees(currentAngle[0] / pileGyroscopeCopy.size());
+        currentAngle[1] = (float) Math.toDegrees(currentAngle[1] / pileGyroscopeCopy.size());
+        currentAngle[2] = (float) Math.toDegrees(currentAngle[2] / pileGyroscopeCopy.size());
+
+        return currentAngle;
     }
 }

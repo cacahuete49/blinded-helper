@@ -33,6 +33,8 @@ import angers.m2.boundingbox.tools.Vista;
  */
 public class Algorithm {
 
+    public static final Scalar BLUE = new Scalar(0, 0, 255);
+
     /**
      * Pré-traitement, traitement et reconnaissance
      *
@@ -53,13 +55,15 @@ public class Algorithm {
 
         // vire les details insignifiant
         Imgproc.erode(threshold, threshold, new Mat(), new Point(), 4);
+        // compense l'erosion
         Imgproc.dilate(threshold, threshold, new Mat(), new Point(), 1);
 
+        // défini le seuil
         double hightThreshold = Imgproc.threshold(threshold, new Mat(), 0, 255, Imgproc.THRESH_OTSU);
         Imgproc.Canny(src, tmp, hightThreshold / 2, hightThreshold);
 
+        // augmente l'épaisseur
         Imgproc.dilate(tmp, tmp, new Mat(), new Point(), 2);
-        Imgproc.erode(tmp, tmp, new Mat(), new Point(), 1);
 
         List<MatOfPoint> contours = new ArrayList<>();
         Imgproc.findContours(tmp, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -68,8 +72,8 @@ public class Algorithm {
 
         Imgproc.cvtColor(tmp, tmp, Imgproc.COLOR_GRAY2RGB);
 
-        int maxElement = 8;
-        //deleteInsideForm(contours, maxElement);
+        int maxElement = 15;
+        deleteInsideForm(contours, maxElement);
         int fenetre = 0;
         int porte = 0;
 
@@ -91,14 +95,14 @@ public class Algorithm {
                 if (DoorForm.getInstance().isRecognized(rotRect, src)) {
                     porte++;
                     MainActivity.obstacle.add(speaker.getLocation(Speaker.DOOR, porte, rotRect.center, tmp.size()));
-                    color = new Scalar(0, 0, 255);
+                    color = BLUE;
                 } else if (WindowForm.getInstance().isRecognized(rotRect, src)) {
                     fenetre++;
                     MainActivity.obstacle.add(speaker.getLocation(Speaker.WINDOW, fenetre, rotRect.center, tmp.size()));
-                    color = new Scalar(0, 0, 255);
+                    color = BLUE;
                 } else if (BlockForm.getInstance().isRecognized(rotRect, src)) {
-                    color = new Scalar(0, 0, 255);
                     MainActivity.obstacle.add(speaker.getLocation(Speaker.WINDOW, 1, rotRect.center, src.size()));
+                    color = BLUE;
                 } else {
                     Log.d("constraint", "NOT RECOGNIZED");
                 }
@@ -120,45 +124,45 @@ public class Algorithm {
      * @param src
      * @return
      */
-    public static Mat stuffFinder(Mat src) {
-
-        Mat tmp = new Mat();
-        Mat resizedTmp = Vista.getSubMat(src.clone(), new Point(Vista.getVista().x + Vista.getVista().width + (src.width() / 5), 0));
-
-        if (resizedTmp.isSubmatrix() && resizedTmp.width() > 0 && resizedTmp.height() > 0) {
-            // pré traitement
-            Mat resized = resizedTmp.clone();
-            Imgproc.resize(resizedTmp, resized, new Size(resizedTmp.size().width / 4.0f, resizedTmp.size().height / 4.0f));
-            Imgproc.dilate(resized, resized, new Mat(), new Point(), 2);
-
-            // Traitement
-            int k = 3;
-            List<Mat> clusters = Kmeans.cluster(resized, k);
-
-            // identification de la frame avec le plus de couleur elle sera le sol
-            float maxNonZeroPercent = 0f;
-            int maxNonZeroIndex = -1;
-
-            for (int i = 0; i < k; i++) {
-                Mat frame = clusters.get(i);
-
-                Imgproc.cvtColor(frame, tmp, Imgproc.COLOR_RGB2GRAY);
-
-                long count = Core.countNonZero(tmp);
-                float res = count / (float) tmp.total();
-
-                if (res > maxNonZeroPercent) {
-                    maxNonZeroPercent = res;
-                    maxNonZeroIndex = i;
-                }
-            }
-
-            // fonctionne draw contour
-            resizedTmp = clusters.get(maxNonZeroIndex).clone();
-
-        }
-        return resizedTmp;
-    }
+//    public static Mat stuffFinder(Mat src) {
+//
+//        Mat tmp = new Mat();
+//        Mat resizedTmp = Vista.getSubMat(src.clone(), new Point(Vista.getVista().x + Vista.getVista().width + (src.width() / 5), 0));
+//
+//        if (resizedTmp.isSubmatrix() && resizedTmp.width() > 0 && resizedTmp.height() > 0) {
+//            // pré traitement
+//            Mat resized = resizedTmp.clone();
+//            Imgproc.resize(resizedTmp, resized, new Size(resizedTmp.size().width / 4.0f, resizedTmp.size().height / 4.0f));
+//            Imgproc.dilate(resized, resized, new Mat(), new Point(), 2);
+//
+//            // Traitement
+//            int k = 3;
+//            List<Mat> clusters = Kmeans.cluster(resized, k);
+//
+//            // identification de la frame avec le plus de couleur elle sera le sol
+//            float maxNonZeroPercent = 0f;
+//            int maxNonZeroIndex = -1;
+//
+//            for (int i = 0; i < k; i++) {
+//                Mat frame = clusters.get(i);
+//
+//                Imgproc.cvtColor(frame, tmp, Imgproc.COLOR_RGB2GRAY);
+//
+//                long count = Core.countNonZero(tmp);
+//                float res = count / (float) tmp.total();
+//
+//                if (res > maxNonZeroPercent) {
+//                    maxNonZeroPercent = res;
+//                    maxNonZeroIndex = i;
+//                }
+//            }
+//
+//            // fonctionne draw contour
+//            resizedTmp = clusters.get(maxNonZeroIndex).clone();
+//
+//        }
+//        return resizedTmp;
+//    }
 
     /**
      * @param rotatedRect
